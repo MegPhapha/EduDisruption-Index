@@ -1,0 +1,13 @@
+# Data
+data/raw/*
+!data/raw/.gitkeep
+
+# Temporary files
+*.json
+*.txt
+scripts/read_xlsx_minimal.py
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
