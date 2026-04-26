@@ -34,3 +34,17 @@
 - ACLED file uses sparse/grouped row format;
   a stateful reader was used to forward-fill
   cercle and year values
+
+## Data Limitation — School Matching
+
+The mali_schools_2023.xlsx file uses a complex 
+multi-header structure with school codes that 
+partially resemble cercle names (e.g. "NarA4738").
+This caused unreliable automated matching.
+
+School counts in the EDI reflect only cercles where 
+matching was unambiguous (16 of 50 cercles).
+For remaining cercles, EDI is based on conflict 
+intensity only. Full school integration would 
+require converting the raw XLSX to a flat CSV 
+with explicit cercle columns.
