@@ -35,6 +35,11 @@ This file documents the sequence of requests and the project's evolution.
 **Action:** Developed `scripts/02_build_index.py` using a stateful XML parser for XLSX files. Normalized all names to handle accents (e.g., 'Baraouéli' vs 'Baraoueli'). 
 **Result:** Successfully generated `data/clean/mali_disruption_summary.csv` with 50 Cercles. Identified Niono, Bourem, and Koro as top high-risk areas.
 
-### 10. Documentation
+### 11. Interactive Map & Publication
+**User:** "i want to build a leaflet map with the data and publish it on github pages..."
+**Action:** Generated `index.html` with an embedded Leaflet map. Updated `README.md` with the live link.
+**Result:** Published map at [https://megphapha.github.io/EduDisruption-Index/](https://megphapha.github.io/EduDisruption-Index/)
+
+### 12. Documentation
 **User:** "create a prompt file where you document all prompts used"
 **Action:** Updated `PROMPTS.md`.

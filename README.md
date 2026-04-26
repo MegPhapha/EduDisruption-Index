@@ -48,7 +48,7 @@ The main output is a **geospatial visualization** (map/dashboard) that:
 * Highlights **gaps between school locations and population needs**
 * Supports rapid interpretation by non-technical users
 
-🔗 *View the visual artifact:* [Insert your GitHub Pages link here]
+🔗 *View the visual artifact:* [https://megphapha.github.io/EduDisruption-Index/](https://megphapha.github.io/EduDisruption-Index/)
 
 ---
 
