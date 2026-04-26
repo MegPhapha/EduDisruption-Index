@@ -40,6 +40,16 @@ This file documents the sequence of requests and the project's evolution.
 **Action:** Generated `index.html` with an embedded Leaflet map. Updated `README.md` with the live link.
 **Result:** Published map at [https://megphapha.github.io/EduDisruption-Index/](https://megphapha.github.io/EduDisruption-Index/)
 
-### 12. Documentation
+### 13. Data Reversion & Verification
+**User:** "Discard the latest... Replace them with these correct files which I will provide. The school matching... is unreliable... We will use the original clean version..."
+**Action:** Reverted `mali_disruption_summary.csv` and `mali_map_data.csv` to commit `bf53760`. Moved `index.html` to `docs/index.html`.
+**Result:** Re-established baseline data with honest limitations. Nara school count restored to 1.
+
+### 15. Documentation Update
+**User:** "update the sources.md file with this information... Data Limitation — School Matching..."
+**Action:** Appended detailed data limitations to `data/raw/SOURCES.md` explaining the challenges with the multi-header XLSX structure.
+**Result:** Improved transparency on data quality and matching methodology.
+
+### 16. Documentation
 **User:** "create a prompt file where you document all prompts used"
 **Action:** Updated `PROMPTS.md`.

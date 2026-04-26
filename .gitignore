@@ -2,13 +2,8 @@
 data/raw/.gitkeep
 !data/raw/.gitkeep
 
-# Temporary and Diagnostic scripts
-scripts/01_*
-scripts/03_acled_diagnostic.py
-scripts/03_diagnostic.py
-scripts/find_*
-scripts/sample_*
-scripts/scan_*
+# Archived and Temporary scripts
+scripts/archive/
 *.json
 *.txt
 

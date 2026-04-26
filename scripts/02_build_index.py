@@ -4,18 +4,15 @@ import csv
 import os
 from utils import normalize
 
-# Load official cercles
+# 1. Load official cercles
 pop_lookup = {}
 with open('data/raw/mali_population_admin2_2020.csv', mode='r', encoding='utf-8-sig') as f:
     reader = csv.DictReader(f)
     for row in reader:
         orig = row['admin2Name_fr']
-        pop_lookup[normalize(orig)] = {
-            'display_name': orig,
-            'region': row['admin1Name_fr'],
-            'pop': int(row['T_TL'])
-        }
+        pop_lookup[normalize(orig)] = {'display_name': orig, 'region': row['admin1Name_fr'], 'pop': int(row['T_TL'])}
 
+# 2. Refined Fuzzy Matcher (Search for cercle name INSIDE any string)
 official_cercles_norm = sorted(list(pop_lookup.keys()), key=len, reverse=True)
 
 CAPITAL_COORDS = {
@@ -38,43 +35,38 @@ CAPITAL_COORDS = {
     'youwarou': (15.25, -4.18)
 }
 
-def fuzzy_match(text):
-    if not text: return None
-    nt = normalize(text)
-    for c in official_cercles_norm:
-        if c in nt: return c
-    return None
-
 def get_cell_val(cell, strings, ns):
     v = cell.find('main:v', ns)
     if v is not None:
-        t = cell.get('t')
-        if t == 's': return strings[int(v.text)]
+        if cell.get('t') == 's': return strings[int(v.text)]
         return v.text
     is_node = cell.find('main:is/main:t', ns)
     if is_node is not None: return is_node.text
     return ""
 
-print("Processing Schools (Fixing Inline/Shared)...")
+print("Processing Schools (Robust String Matching)...")
 schools_stats = {c: {'total': 0, 'closed': 0, 'lats': [], 'lons': []} for c in official_cercles_norm}
 with zipfile.ZipFile('data/raw/mali_schools_2023.xlsx', 'r') as zip_ref:
-    strings = []
-    try:
-        with zip_ref.open('xl/sharedStrings.xml') as f:
-            tree = ET.parse(f)
-            strings = [el.text for el in tree.findall('.//{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t')]
-    except: pass
+    with zip_ref.open('xl/sharedStrings.xml') as f:
+        tree = ET.parse(f)
+        strings = [el.text if el.text else "" for el in tree.findall('.//{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t')]
     with zip_ref.open('xl/worksheets/sheet3.xml') as f:
         tree = ET.parse(f)
         ns = {'main': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
         for row in tree.findall('.//main:row', ns):
             if int(row.get('r')) < 4: continue
             row_vals = [get_cell_val(c, strings, ns) for c in row.findall('main:c', ns)]
+            
             cercle = None
             for v in row_vals:
-                cercle = fuzzy_match(v)
+                nv = normalize(v)
+                for c in official_cercles_norm:
+                    if c in nv:
+                        cercle = c
+                        break
                 if cercle: break
             if not cercle: continue
+            
             lat, lon = None, None
             for v in row_vals:
                 try:
@@ -89,25 +81,22 @@ with zipfile.ZipFile('data/raw/mali_schools_2023.xlsx', 'r') as zip_ref:
                 schools_stats[cercle]['lats'].append(lat)
                 schools_stats[cercle]['lons'].append(lon)
 
-print("Processing ACLED (Fixing Inline Strings)...")
+print("Processing ACLED (Backfill)...")
 conflict_stats = {c: {'events': 0, 'fatalities': 0} for c in official_cercles_norm}
 with zipfile.ZipFile('data/raw/acled_mali_summary.xlsx', 'r') as zip_ref:
-    strings = []
-    try:
-        with zip_ref.open('xl/sharedStrings.xml') as f:
-            tree = ET.parse(f)
-            strings = [el.text for el in tree.findall('.//{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t')]
-    except: pass
     with zip_ref.open('xl/worksheets/sheet2.xml') as f:
         tree = ET.parse(f)
         ns = {'main': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
         cur_c, cur_y = None, None
         for row in tree.findall('.//main:row', ns):
             if int(row.get('r')) < 2: continue
-            row_data = {c.get('r').rstrip('0123456789'): get_cell_val(c, strings, ns) for c in row.findall('main:c', ns)}
-            if row_data.get('C'): 
-                nc = fuzzy_match(row_data['C'])
-                if nc: cur_c = nc
+            row_data = {c.get('r').rstrip('0123456789'): get_cell_val(c, [], ns) for c in row.findall('main:c', ns)}
+            if row_data.get('C'):
+                nv = normalize(row_data['C'])
+                for c in official_cercles_norm:
+                    if c in nv:
+                        cur_c = c
+                        break
             if row_data.get('H'): cur_y = row_data['H']
             if cur_c and cur_y and cur_y.isdigit() and 2020 <= int(cur_y) <= 2024:
                 try:
@@ -124,7 +113,9 @@ for k, p in pop_lookup.items():
     l, ln = (sum(s['lats'])/len(s['lats']), sum(s['lons'])/len(s['lons'])) if s['lats'] else CAPITAL_COORDS.get(k, (0,0))
     final.append({'cercle': p['display_name'], 'region': p['region'], 'lat': round(l,4), 'lng': round(ln,4), 'total_schools': s['total'], 'closed_schools': s['closed'], 'pct_closed': round(p_cl,2), 'total_conflict_events': c['events'], 'population': p['pop'], 'events_per_100k': round(e_100k,2)})
 
-m_pc, m_ev = max(r['pct_closed'] for r in final), max(r['events_per_100k'] for r in final)
+m_pc = max([r['pct_closed'] for r in final]) if final else 1
+m_ev = max([r['events_per_100k'] for r in final]) if final else 1
+
 for r in final:
     edi = round(((r['pct_closed']/m_pc if m_pc else 0)*0.6) + ((r['events_per_100k']/m_ev if m_ev else 0)*0.4), 3)
     r['EDI_score'], r['risk_tier'] = edi, ("Critical" if edi>=0.7 else "High" if edi>=0.4 else "Medium" if edi>=0.2 else "Low")
@@ -140,8 +131,10 @@ with open('data/clean/mali_map_data.csv', 'w', newline='', encoding='utf-8') as 
     dw.writeheader()
     for r in final: dw.writerow({'cercle':r['cercle'],'region':r['region'],'lat':r['lat'],'lng':r['lng'],'edi':r['EDI_score'],'risk':r['risk_tier'],'total_schools':r['total_schools'],'closed_schools':r['closed_schools'],'pct_closed':r['pct_closed'],'total_conflict_events':r['total_conflict_events'],'events_per_100k':r['events_per_100k'],'population':r['population']})
 
-print("\nTOP 20 CERLCES BY EDI SCORE:")
+print("\nTOP 20 CERLCES BY EDI SCORE (ROBUST MATCH):")
 fmt = "{:<15} | {:<12} | {:<7} | {:<6} | {:<6} | {:<9} | {:<6} | {}"
 print(fmt.format('Cercle','Region','Schools','Closed','Events','Pop','EDI','Tier'))
 print("-" * 90)
 for r in final[:20]: print(fmt.format(r['cercle'],r['region'],r['total_schools'],r['closed_schools'],r['total_conflict_events'],r['population'],r['EDI_score'],r['risk_tier']))
+
+print(f"\nMatching Summary: {len([r for r in final if r['total_schools'] > 0])} cercles matched with schools.")
