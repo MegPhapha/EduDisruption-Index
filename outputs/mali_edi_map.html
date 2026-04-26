@@ -1,0 +1,1170 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Mali EDI Map</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+            body { font-family: 'Inter', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+            #map { flex-grow: 1; }
+            .header { background: #1a2a3a; color: white; padding: 20px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 1000; }
+            .header h1 { margin: 0; font-size: 24px; letter-spacing: -0.5px; }
+            .header p { margin: 5px 0 0 0; opacity: 0.8; font-size: 14px; }
+            .legend { background: white; padding: 15px; line-height: 1.5em; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); border: none; }
+            .legend i { width: 18px; height: 18px; float: left; margin-right: 10px; border-radius: 50%; }
+            .info-panel {
+                position: absolute; top: 100px; left: 20px; width: 250px;
+                background: white; padding: 20px; border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 1000;
+            }
+            .info-panel h2 { margin: 0 0 15px 0; font-size: 16px; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+            .top-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+            .top-name { font-weight: bold; }
+            .top-score { color: #e34a33; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Mali Education Disruption Index (EDI)</h1>
+            <p>Geospatial analysis of conflict impact and school accessibility (2020-2024)</p>
+        </div>
+        <div class="info-panel">
+            <h2>Highest Risk Areas</h2>
+            <div class="top-item"><span class="top-name">Tombouctou</span><span class="top-score">0.644</span></div><div class="top-item"><span class="top-name">Ménaka</span><span class="top-score">0.641</span></div><div class="top-item"><span class="top-name">Bourem</span><span class="top-score">0.623</span></div><div class="top-item"><span class="top-name">Bankass</span><span class="top-score">0.616</span></div><div class="top-item"><span class="top-name">Diré</span><span class="top-score">0.61</span></div>
+        </div>
+        <div id="map"></div>
+        <script>
+            var map = L.map('map', { zoomControl: false }).setView([16.5, -4.0], 6);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            // Clean CartoDB Light basemap
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(map);
+
+            
+        L.circleMarker([10.0, 1.0], {
+            radius: 16.1,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Tombouctou</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Tombouctou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.644</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>11</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>11</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>186</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([15.92, 2.4], {
+            radius: 16.025,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Ménaka</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Gao</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.641</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>10</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>8</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>289</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([13.5, 3.5], {
+            radius: 15.575,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Bourem</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Gao</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.623</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>4</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>4</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>89</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([19.1538, 3.0769], {
+            radius: 15.4,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Bankass</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Mopti</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.616</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>30</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>29</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>313</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([22.0, 4.0], {
+            radius: 15.25,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Diré</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Tombouctou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.61</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>9</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>9</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>35</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([15.25, -4.18], {
+            radius: 15.25,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Youwarou</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Mopti</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.61</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>7</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>7</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>37</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([18.0, 3.0], {
+            radius: 15.225,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Yorosso</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Sikasso</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.609</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>7</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>7</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>65</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([15.0, 1.0], {
+            radius: 15.1,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Banamba</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Koulikoro</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.604</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>2</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>2</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>28</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([18.3, 3.5], {
+            radius: 15.075,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Djenné</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Mopti</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.603</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>33</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>31</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>274</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([12.8571, 3.7143], {
+            radius: 15.075,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Koutiala</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Sikasso</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.603</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>28</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>28</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>52</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([18.0, 2.0], {
+            radius: 15.049999999999999,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Bafoulabe</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kayes</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.602</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>2</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>2</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>16</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([17.6667, 1.6667], {
+            radius: 15.049999999999999,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Sikasso</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Sikasso</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.602</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>6</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>6</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>39</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([10.0, 5.0], {
+            radius: 15.024999999999999,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Bla</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Ségou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.601</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>5</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>5</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>13</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([22.0, 6.0], {
+            radius: 15.024999999999999,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Kayes</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kayes</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.601</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>1</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>1</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>16</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([13.0, 6.0], {
+            radius: 14.924999999999999,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Ansongo</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Gao</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.597</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>5</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>4</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>508</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([18.1515, 3.7727], {
+            radius: 14.674999999999999,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Koro</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Mopti</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.587</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>191</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>180</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>262</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([15.75, 3.0], {
+            radius: 14.674999999999999,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Koulikoro</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Koulikoro</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.587</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>42</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>41</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>9</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([16.5, 2.5], {
+            radius: 13.55,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Kita</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kayes</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.542</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>10</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>9</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>25</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([16.9297, 3.474], {
+            radius: 13.325000000000001,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>San</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Ségou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.533</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>494</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>436</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>33</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([23.0, 3.0], {
+            radius: 13.225000000000001,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Douentza</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Mopti</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.529</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>14</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>11</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>466</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([18.6667, 3.3333], {
+            radius: 12.275,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Kadiolo</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Sikasso</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.491</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>11</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>9</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>2</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([18.0, 2.0], {
+            radius: 11.425,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Bandiagara</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Mopti</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.457</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>3</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>2</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>591</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([19.0, 2.0], {
+            radius: 10.0,
+            fillColor: "#e34a33",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Abeibara</h3>
+                <span style='color: white; background: #e34a33; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>High RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kidal</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.4</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>136</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([16.4919, 4.2198], {
+            radius: 9.45,
+            fillColor: "#fdbb84",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Nara</h3>
+                <span style='color: white; background: #fdbb84; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Medium RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Koulikoro</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.378</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>1735</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>1034</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>162</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([16.8929, 3.9164], {
+            radius: 9.225,
+            fillColor: "#fdbb84",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Gao</h3>
+                <span style='color: white; background: #fdbb84; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Medium RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Gao</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.369</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>1813</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>947</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>442</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([20.1883, 0.0794], {
+            radius: 9.025,
+            fillColor: "#fdbb84",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Kati</h3>
+                <span style='color: white; background: #fdbb84; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Medium RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Koulikoro</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.361</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>10</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>6</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>27</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([14.49, -4.19], {
+            radius: 8.200000000000001,
+            fillColor: "#fdbb84",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Mopti</h3>
+                <span style='color: white; background: #fdbb84; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Medium RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Mopti</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.328</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>2</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>1</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>336</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([20.2, 0.98], {
+            radius: 6,
+            fillColor: "#fdbb84",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Tessalit</h3>
+                <span style='color: white; background: #fdbb84; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Medium RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kidal</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.211</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>111</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([18.44, 1.41], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Kidal</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kidal</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.165</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>182</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([16.88, -1.93], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Gourma-Rharous</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Tombouctou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.042</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>153</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([14.25, -5.98], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Niono</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Ségou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.042</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>510</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([14.11, -5.35], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Macina</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Ségou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.034</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>266</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([19.47, 2.47], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Tin-Essako</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kidal</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.034</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>9</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([16.41, -3.67], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Goundam</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Tombouctou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.026</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>130</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([15.93, -3.98], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Niafunké</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Tombouctou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.022</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>130</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([18.5, 3.0], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Ténenkou</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Mopti</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.019</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>6</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>100</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([13.28, -4.58], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Tominian</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Ségou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.012</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>87</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([14.53, -9.18], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Diéma</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kayes</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.005</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>37</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([13.45, -6.27], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Ségou</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Ségou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.005</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>120</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([11.93, -8.42], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Kangaba</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Koulikoro</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.004</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>13</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([11.18, -8.15], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Yanfolila</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Sikasso</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.004</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>28</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([13.55, -8.03], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Kolokani</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Koulikoro</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.003</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>25</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([12.83, -11.23], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Kéniéba</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kayes</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.002</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>10</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([15.23, -9.58], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Nioro</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kayes</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.002</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>18</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([12.65, -8.0], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Bamako</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Bamako</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.001</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>42</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([13.37, -6.9], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Baraouéli</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Ségou</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.001</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>9</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([11.42, -7.48], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Bougouni</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Sikasso</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.001</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>15</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([12.7, -6.8], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Dioila</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Koulikoro</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.001</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>13</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([11.08, -6.88], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Kolondieba</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Sikasso</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.001</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>5</td></tr>
+                </table>
+            </div>
+        `);
+        
+        L.circleMarker([15.13, -10.57], {
+            radius: 6,
+            fillColor: "#2ca25f",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+        }).addTo(map).bindPopup(`
+            <div style='font-family: Arial; min-width: 200px;'>
+                <h3 style='margin:0 0 5px 0; color:#2c3e50;'>Yélimané</h3>
+                <span style='color: white; background: #2ca25f; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: bold;'>Low RISK</span>
+                <hr style='border: 0; border-top: 1px solid #eee; margin: 10px 0;'>
+                <table style='width: 100%; font-size: 0.9em;'>
+                    <tr><td><b>Region:</b></td><td align='right'>Kayes</td></tr>
+                    <tr><td><b>EDI Score:</b></td><td align='right'>0.001</td></tr>
+                    <tr><td><b>Schools:</b></td><td align='right'>0</td></tr>
+                    <tr><td><b>Closed:</b></td><td align='right' style='color:red;'>0</td></tr>
+                    <tr><td><b>Events:</b></td><td align='right'>7</td></tr>
+                </table>
+            </div>
+        `);
+        
+
+            var legend = L.control({position: 'bottomright'});
+            legend.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'legend'),
+                    grades = ["Critical", "High", "Medium", "Low"],
+                    labels = {"Critical": "#b30000", "High": "#e34a33", "Medium": "#fdbb84", "Low": "#2ca25f"};
+                div.innerHTML = '<b style="margin-bottom:10px; display:block;">Risk Level</b>';
+                for (var i = 0; i < grades.length; i++) {
+                    div.innerHTML +=
+                        '<i style="background:' + labels[grades[i]] + '"></i> ' +
+                        grades[i] + '<br>';
+                }
+                return div;
+            };
+            legend.addTo(map);
+        </script>
+    </body>
+    </html>
+    
