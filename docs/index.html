@@ -1,176 +1,961 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Mali Education Disruption Index</title>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    #map { height: 100vh; width: 100%; }
-    .legend {
-      background: white;
-      padding: 12px 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      line-height: 2;
-      font-size: 13px;
-    }
-    .legend-title {
-      font-weight: bold;
-      font-size: 14px;
-      margin-bottom: 4px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 4px;
-    }
-    .legend i {
-      width: 13px;
-      height: 13px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 7px;
-      vertical-align: middle;
-      opacity: 0.85;
-    }
-    .info-box {
-      background: white;
-      padding: 10px 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      max-width: 260px;
-    }
-    .info-box h3 { margin: 0 0 3px 0; font-size: 15px; color: #222; }
-    .info-box p  { margin: 0; font-size: 11px; color: #666; line-height: 1.5; }
-  </style>
-</head>
-<body>
-<div id="map"></div>
-<script>
 
-const mapData = [
-  {cercle:"Niono",region:"Ségou",lat:14.25,lng:-5.98,edi:0.68,risk:"High",schools:1,closed:1,pct_closed:100.0,events:510,per100k:113.4,pop:449717},
-  {cercle:"Bourem",region:"Gao",lat:18.97,lng:0.36,edi:0.644,risk:"High",schools:1,closed:1,pct_closed:100.0,events:89,per100k:62.1,pop:143418},
-  {cercle:"Koro",region:"Mopti",lat:14.08,lng:-3.08,edi:0.642,risk:"High",schools:2,closed:2,pct_closed:100.0,events:262,per100k:58.6,pop:446902},
-  {cercle:"Nara",region:"Koulikoro",lat:15.17,lng:-7.28,edi:0.639,risk:"High",schools:1,closed:1,pct_closed:100.0,events:162,per100k:54.3,pop:298156},
-  {cercle:"Yorosso",region:"Sikasso",lat:12.37,lng:-4.78,edi:0.618,risk:"High",schools:1,closed:1,pct_closed:100.0,events:65,per100k:24.9,pop:260812},
-  {cercle:"Ségou",region:"Ségou",lat:13.45,lng:-6.27,edi:0.61,risk:"High",schools:1,closed:1,pct_closed:100.0,events:120,per100k:14.0,pop:857987},
-  {cercle:"Banamba",region:"Koulikoro",lat:13.55,lng:-7.45,edi:0.608,risk:"High",schools:1,closed:1,pct_closed:100.0,events:28,per100k:11.9,pop:235421},
-  {cercle:"Sikasso",region:"Sikasso",lat:11.33,lng:-5.67,edi:0.603,risk:"High",schools:1,closed:1,pct_closed:100.0,events:39,per100k:4.3,pop:905895},
-  {cercle:"Bougouni",region:"Sikasso",lat:11.42,lng:-7.48,edi:0.602,risk:"High",schools:1,closed:1,pct_closed:100.0,events:15,per100k:2.7,pop:565175},
-  {cercle:"Kadiolo",region:"Sikasso",lat:10.57,lng:-5.7,edi:0.6,risk:"High",schools:1,closed:1,pct_closed:100.0,events:2,per100k:0.7,pop:300013},
-  {cercle:"Ménaka",region:"Gao",lat:15.92,lng:2.4,edi:0.565,risk:"High",schools:2,closed:1,pct_closed:50.0,events:251,per100k:374.0,pop:67119},
-  {cercle:"Gao",region:"Gao",lat:16.27,lng:-0.04,edi:0.406,risk:"High",schools:2,closed:1,pct_closed:50.0,events:442,per100k:149.7,pop:295236},
-  {cercle:"Tessalit",region:"Kidal",lat:20.2,lng:0.98,edi:0.4,risk:"High",schools:1,closed:0,pct_closed:0.0,events:111,per100k:564.5,pop:19665},
-  {cercle:"Mopti",region:"Mopti",lat:14.49,lng:-4.19,edi:0.352,risk:"Medium",schools:2,closed:1,pct_closed:50.0,events:336,per100k:73.9,pop:454689},
-  {cercle:"Abeibara",region:"Kidal",lat:19.0,lng:2.0,edi:0.346,risk:"Medium",schools:0,closed:0,pct_closed:0,events:62,per100k:488.6,pop:12690},
-  {cercle:"Kidal",region:"Kidal",lat:18.44,lng:1.41,edi:0.313,risk:"Medium",schools:0,closed:0,pct_closed:0,events:182,per100k:441.2,pop:41248},
-  {cercle:"Ansongo",region:"Gao",lat:15.67,lng:0.5,edi:0.221,risk:"Medium",schools:0,closed:0,pct_closed:0,events:508,per100k:312.4,pop:162637},
-  {cercle:"Douentza",region:"Mopti",lat:15.0,lng:-2.95,edi:0.109,risk:"Low",schools:1,closed:0,pct_closed:0.0,events:466,per100k:153.3,pop:303974},
-  {cercle:"Bandiagara",region:"Mopti",lat:14.35,lng:-3.61,edi:0.108,risk:"Low",schools:0,closed:0,pct_closed:0,events:591,per100k:153.0,pop:386346},
-  {cercle:"Tombouctou",region:"Tombouctou",lat:16.77,lng:-3.0,edi:0.084,risk:"Low",schools:0,closed:0,pct_closed:0,events:186,per100k:118.5,pop:156936},
-  {cercle:"Gourma-Rharous",region:"Tombouctou",lat:16.88,lng:-1.93,edi:0.079,risk:"Low",schools:0,closed:0,pct_closed:0,events:153,per100k:111.8,pop:136852},
-  {cercle:"Djenné",region:"Mopti",lat:13.91,lng:-4.56,edi:0.076,risk:"Low",schools:0,closed:0,pct_closed:0,events:274,per100k:106.7,pop:256877},
-  {cercle:"Bankass",region:"Mopti",lat:14.08,lng:-3.52,edi:0.068,risk:"Low",schools:0,closed:0,pct_closed:0,events:313,per100k:95.9,pop:326346},
-  {cercle:"Macina",region:"Ségou",lat:14.11,lng:-5.35,edi:0.065,risk:"Low",schools:0,closed:0,pct_closed:0,events:266,per100k:91.4,pop:290974},
-  {cercle:"Tin-Essako",region:"Kidal",lat:19.47,lng:2.47,edi:0.065,risk:"Low",schools:0,closed:0,pct_closed:0,events:9,per100k:91.0,pop:9887},
-  {cercle:"Goundam",region:"Tombouctou",lat:16.41,lng:-3.67,edi:0.049,risk:"Low",schools:0,closed:0,pct_closed:0,events:130,per100k:69.7,pop:186519},
-  {cercle:"Niafunké",region:"Tombouctou",lat:15.93,lng:-3.98,edi:0.043,risk:"Low",schools:0,closed:0,pct_closed:0,events:130,per100k:60.1,pop:216239},
-  {cercle:"Ténenkou",region:"Mopti",lat:14.52,lng:-4.92,edi:0.035,risk:"Low",schools:0,closed:0,pct_closed:0,events:100,per100k:49.8,pop:200810},
-  {cercle:"Tominian",region:"Ségou",lat:13.28,lng:-4.58,edi:0.023,risk:"Low",schools:0,closed:0,pct_closed:0,events:87,per100k:31.9,pop:272550},
-  {cercle:"Youwarou",region:"Mopti",lat:15.25,lng:-4.18,edi:0.02,risk:"Low",schools:0,closed:0,pct_closed:0,events:37,per100k:27.7,pop:133759},
-  {cercle:"Diré",region:"Tombouctou",lat:16.27,lng:-3.4,edi:0.018,risk:"Low",schools:0,closed:0,pct_closed:0,events:35,per100k:25.9,pop:135161},
-  {cercle:"Diéma",region:"Kayes",lat:14.53,lng:-9.18,edi:0.01,risk:"Low",schools:0,closed:0,pct_closed:0,events:37,per100k:14.2,pop:261017},
-  {cercle:"Yanfolila",region:"Sikasso",lat:11.18,lng:-8.15,edi:0.008,risk:"Low",schools:0,closed:0,pct_closed:0,events:28,per100k:10.7,pop:262182},
-  {cercle:"Kangaba",region:"Koulikoro",lat:11.93,lng:-8.42,edi:0.007,risk:"Low",schools:0,closed:0,pct_closed:0,events:13,per100k:10.5,pop:123744},
-  {cercle:"Kolokani",region:"Koulikoro",lat:13.55,lng:-8.03,edi:0.006,risk:"Low",schools:0,closed:0,pct_closed:0,events:25,per100k:8.7,pop:286565},
-  {cercle:"San",region:"Ségou",lat:13.3,lng:-4.9,edi:0.006,risk:"Low",schools:0,closed:0,pct_closed:0,events:33,per100k:8.0,pop:411190},
-  {cercle:"Nioro",region:"Kayes",lat:15.23,lng:-9.58,edi:0.005,risk:"Low",schools:0,closed:0,pct_closed:0,events:18,per100k:6.4,pop:282160},
-  {cercle:"Bafoulabe",region:"Kayes",lat:13.8,lng:-10.83,edi:0.004,risk:"Low",schools:0,closed:0,pct_closed:0,events:16,per100k:5.6,pop:287979},
-  {cercle:"Baraouéli",region:"Ségou",lat:13.37,lng:-6.9,edi:0.003,risk:"Low",schools:0,closed:0,pct_closed:0,events:9,per100k:3.6,pop:250040},
-  {cercle:"Bla",region:"Ségou",lat:13.48,lng:-5.77,edi:0.003,risk:"Low",schools:0,closed:0,pct_closed:0,events:13,per100k:3.7,pop:349644},
-  {cercle:"Kéniéba",region:"Kayes",lat:12.83,lng:-11.23,edi:0.003,risk:"Low",schools:0,closed:0,pct_closed:0,events:10,per100k:4.1,pop:242871},
-  {cercle:"Kita",region:"Kayes",lat:13.03,lng:-9.49,edi:0.003,risk:"Low",schools:1,closed:0,pct_closed:0.0,events:25,per100k:4.7,pop:533110},
-  {cercle:"Dioila",region:"Koulikoro",lat:12.7,lng:-6.8,edi:0.002,risk:"Low",schools:0,closed:0,pct_closed:0,events:13,per100k:2.2,pop:602633},
-  {cercle:"Kati",region:"Koulikoro",lat:12.75,lng:-8.07,edi:0.002,risk:"Low",schools:0,closed:0,pct_closed:0,events:27,per100k:2.3,pop:1179233},
-  {cercle:"Kayes",region:"Kayes",lat:14.45,lng:-11.44,edi:0.002,risk:"Low",schools:0,closed:0,pct_closed:0,events:16,per100k:2.5,pop:632503},
-  {cercle:"Koulikoro",region:"Koulikoro",lat:12.86,lng:-7.56,edi:0.002,risk:"Low",schools:0,closed:0,pct_closed:0,events:9,per100k:3.5,pop:259586},
-  {cercle:"Koutiala",region:"Sikasso",lat:12.39,lng:-5.47,edi:0.002,risk:"Low",schools:0,closed:0,pct_closed:0,events:24,per100k:3.4,pop:715430},
-  {cercle:"Yélimané",region:"Kayes",lat:15.13,lng:-10.57,edi:0.002,risk:"Low",schools:0,closed:0,pct_closed:0,events:7,per100k:3.2,pop:217564},
-  {cercle:"Bamako",region:"Bamako",lat:12.65,lng:-8.0,edi:0.001,risk:"Low",schools:0,closed:0,pct_closed:0,events:42,per100k:1.9,pop:2231344},
-  {cercle:"Kolondieba",region:"Sikasso",lat:11.08,lng:-6.88,edi:0.001,risk:"Low",schools:0,closed:0,pct_closed:0,events:5,per100k:2.0,pop:248309}
-];
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Mali Education Disruption Index Map</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <style>
+            #map { height: 800px; width: 100%; }
+            body { font-family: sans-serif; margin: 0; }
+            .legend {
+                background: white;
+                padding: 10px;
+                line-height: 1.5em;
+                border: 1px solid gray;
+                border-radius: 5px;
+            }
+            .legend i {
+                width: 18px;
+                height: 18px;
+                float: left;
+                margin-right: 8px;
+                opacity: 0.7;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="padding: 15px; background: #2c3e50; color: white;">
+            <h1>Mali Education Disruption Index (EDI)</h1>
+            <p>Risk prioritization based on School Closures and Conflict Intensity (2020-2024)</p>
+        </div>
+        <div id="map"></div>
+        <script>
+            var map = L.map('map').setView([17.57, -3.99], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
 
-  function getColor(risk) {
-    if (risk === "Critical") return "#d73027";
-    if (risk === "High")     return "#fc8d59";
-    if (risk === "Medium")   return "#fee08b";
-    return "#91cf60";
-  }
+            
+        L.circleMarker([10.0, 1.0], {
+            radius: 12.88,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Tombouctou</b><br>
+            Region: Tombouctou<br>
+            Risk Tier: High<br>
+            EDI Score: 0.644<br><br>
+            Schools: 11 (11 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 186<br>
+            Events per 100k: 118.52
+        `);
+        
+        L.circleMarker([15.92, 2.4], {
+            radius: 12.82,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Ménaka</b><br>
+            Region: Gao<br>
+            Risk Tier: High<br>
+            EDI Score: 0.641<br><br>
+            Schools: 10 (8 closed)<br>
+            % Closed: 80.0%<br>
+            Conflict Events: 289<br>
+            Events per 100k: 430.58
+        `);
+        
+        L.circleMarker([13.5, 3.5], {
+            radius: 12.46,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Bourem</b><br>
+            Region: Gao<br>
+            Risk Tier: High<br>
+            EDI Score: 0.623<br><br>
+            Schools: 4 (4 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 89<br>
+            Events per 100k: 62.06
+        `);
+        
+        L.circleMarker([19.1538, 3.0769], {
+            radius: 12.32,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Bankass</b><br>
+            Region: Mopti<br>
+            Risk Tier: High<br>
+            EDI Score: 0.616<br><br>
+            Schools: 30 (29 closed)<br>
+            % Closed: 96.67%<br>
+            Conflict Events: 313<br>
+            Events per 100k: 95.91
+        `);
+        
+        L.circleMarker([22.0, 4.0], {
+            radius: 12.2,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Diré</b><br>
+            Region: Tombouctou<br>
+            Risk Tier: High<br>
+            EDI Score: 0.61<br><br>
+            Schools: 9 (9 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 35<br>
+            Events per 100k: 25.9
+        `);
+        
+        L.circleMarker([15.25, -4.18], {
+            radius: 12.2,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Youwarou</b><br>
+            Region: Mopti<br>
+            Risk Tier: High<br>
+            EDI Score: 0.61<br><br>
+            Schools: 7 (7 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 37<br>
+            Events per 100k: 27.66
+        `);
+        
+        L.circleMarker([18.0, 3.0], {
+            radius: 12.18,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Yorosso</b><br>
+            Region: Sikasso<br>
+            Risk Tier: High<br>
+            EDI Score: 0.609<br><br>
+            Schools: 7 (7 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 65<br>
+            Events per 100k: 24.92
+        `);
+        
+        L.circleMarker([15.0, 1.0], {
+            radius: 12.08,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Banamba</b><br>
+            Region: Koulikoro<br>
+            Risk Tier: High<br>
+            EDI Score: 0.604<br><br>
+            Schools: 2 (2 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 28<br>
+            Events per 100k: 11.89
+        `);
+        
+        L.circleMarker([18.3, 3.5], {
+            radius: 12.059999999999999,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Djenné</b><br>
+            Region: Mopti<br>
+            Risk Tier: High<br>
+            EDI Score: 0.603<br><br>
+            Schools: 33 (31 closed)<br>
+            % Closed: 93.94%<br>
+            Conflict Events: 274<br>
+            Events per 100k: 106.67
+        `);
+        
+        L.circleMarker([12.8571, 3.7143], {
+            radius: 12.059999999999999,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Koutiala</b><br>
+            Region: Sikasso<br>
+            Risk Tier: High<br>
+            EDI Score: 0.603<br><br>
+            Schools: 28 (28 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 52<br>
+            Events per 100k: 7.27
+        `);
+        
+        L.circleMarker([18.0, 2.0], {
+            radius: 12.04,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Bafoulabe</b><br>
+            Region: Kayes<br>
+            Risk Tier: High<br>
+            EDI Score: 0.602<br><br>
+            Schools: 2 (2 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 16<br>
+            Events per 100k: 5.56
+        `);
+        
+        L.circleMarker([17.6667, 1.6667], {
+            radius: 12.04,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Sikasso</b><br>
+            Region: Sikasso<br>
+            Risk Tier: High<br>
+            EDI Score: 0.602<br><br>
+            Schools: 6 (6 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 39<br>
+            Events per 100k: 4.31
+        `);
+        
+        L.circleMarker([10.0, 5.0], {
+            radius: 12.02,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Bla</b><br>
+            Region: Ségou<br>
+            Risk Tier: High<br>
+            EDI Score: 0.601<br><br>
+            Schools: 5 (5 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 13<br>
+            Events per 100k: 3.72
+        `);
+        
+        L.circleMarker([22.0, 6.0], {
+            radius: 12.02,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Kayes</b><br>
+            Region: Kayes<br>
+            Risk Tier: High<br>
+            EDI Score: 0.601<br><br>
+            Schools: 1 (1 closed)<br>
+            % Closed: 100.0%<br>
+            Conflict Events: 16<br>
+            Events per 100k: 2.53
+        `);
+        
+        L.circleMarker([13.0, 6.0], {
+            radius: 11.94,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Ansongo</b><br>
+            Region: Gao<br>
+            Risk Tier: High<br>
+            EDI Score: 0.597<br><br>
+            Schools: 5 (4 closed)<br>
+            % Closed: 80.0%<br>
+            Conflict Events: 508<br>
+            Events per 100k: 312.35
+        `);
+        
+        L.circleMarker([18.1515, 3.7727], {
+            radius: 11.739999999999998,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Koro</b><br>
+            Region: Mopti<br>
+            Risk Tier: High<br>
+            EDI Score: 0.587<br><br>
+            Schools: 191 (180 closed)<br>
+            % Closed: 94.24%<br>
+            Conflict Events: 262<br>
+            Events per 100k: 58.63
+        `);
+        
+        L.circleMarker([15.75, 3.0], {
+            radius: 11.739999999999998,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Koulikoro</b><br>
+            Region: Koulikoro<br>
+            Risk Tier: High<br>
+            EDI Score: 0.587<br><br>
+            Schools: 42 (41 closed)<br>
+            % Closed: 97.62%<br>
+            Conflict Events: 9<br>
+            Events per 100k: 3.47
+        `);
+        
+        L.circleMarker([16.5, 2.5], {
+            radius: 10.84,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Kita</b><br>
+            Region: Kayes<br>
+            Risk Tier: High<br>
+            EDI Score: 0.542<br><br>
+            Schools: 10 (9 closed)<br>
+            % Closed: 90.0%<br>
+            Conflict Events: 25<br>
+            Events per 100k: 4.69
+        `);
+        
+        L.circleMarker([16.9297, 3.474], {
+            radius: 10.66,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: San</b><br>
+            Region: Ségou<br>
+            Risk Tier: High<br>
+            EDI Score: 0.533<br><br>
+            Schools: 494 (436 closed)<br>
+            % Closed: 88.26%<br>
+            Conflict Events: 33<br>
+            Events per 100k: 8.03
+        `);
+        
+        L.circleMarker([23.0, 3.0], {
+            radius: 10.58,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Douentza</b><br>
+            Region: Mopti<br>
+            Risk Tier: High<br>
+            EDI Score: 0.529<br><br>
+            Schools: 14 (11 closed)<br>
+            % Closed: 78.57%<br>
+            Conflict Events: 466<br>
+            Events per 100k: 153.3
+        `);
+        
+        L.circleMarker([18.6667, 3.3333], {
+            radius: 9.82,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Kadiolo</b><br>
+            Region: Sikasso<br>
+            Risk Tier: High<br>
+            EDI Score: 0.491<br><br>
+            Schools: 11 (9 closed)<br>
+            % Closed: 81.82%<br>
+            Conflict Events: 2<br>
+            Events per 100k: 0.67
+        `);
+        
+        L.circleMarker([18.0, 2.0], {
+            radius: 9.14,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Bandiagara</b><br>
+            Region: Mopti<br>
+            Risk Tier: High<br>
+            EDI Score: 0.457<br><br>
+            Schools: 3 (2 closed)<br>
+            % Closed: 66.67%<br>
+            Conflict Events: 591<br>
+            Events per 100k: 152.97
+        `);
+        
+        L.circleMarker([19.0, 2.0], {
+            radius: 8.0,
+            fillColor: "#f46d43",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Abeibara</b><br>
+            Region: Kidal<br>
+            Risk Tier: High<br>
+            EDI Score: 0.4<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 136<br>
+            Events per 100k: 1071.71
+        `);
+        
+        L.circleMarker([16.4919, 4.2198], {
+            radius: 7.5600000000000005,
+            fillColor: "#fee08b",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Nara</b><br>
+            Region: Koulikoro<br>
+            Risk Tier: Medium<br>
+            EDI Score: 0.378<br><br>
+            Schools: 1735 (1034 closed)<br>
+            % Closed: 59.6%<br>
+            Conflict Events: 162<br>
+            Events per 100k: 54.33
+        `);
+        
+        L.circleMarker([16.8929, 3.9164], {
+            radius: 7.38,
+            fillColor: "#fee08b",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Gao</b><br>
+            Region: Gao<br>
+            Risk Tier: Medium<br>
+            EDI Score: 0.369<br><br>
+            Schools: 1813 (947 closed)<br>
+            % Closed: 52.23%<br>
+            Conflict Events: 442<br>
+            Events per 100k: 149.71
+        `);
+        
+        L.circleMarker([20.1883, 0.0794], {
+            radius: 7.22,
+            fillColor: "#fee08b",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Kati</b><br>
+            Region: Koulikoro<br>
+            Risk Tier: Medium<br>
+            EDI Score: 0.361<br><br>
+            Schools: 10 (6 closed)<br>
+            % Closed: 60.0%<br>
+            Conflict Events: 27<br>
+            Events per 100k: 2.29
+        `);
+        
+        L.circleMarker([14.49, -4.19], {
+            radius: 6.5600000000000005,
+            fillColor: "#fee08b",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Mopti</b><br>
+            Region: Mopti<br>
+            Risk Tier: Medium<br>
+            EDI Score: 0.328<br><br>
+            Schools: 2 (1 closed)<br>
+            % Closed: 50.0%<br>
+            Conflict Events: 336<br>
+            Events per 100k: 73.9
+        `);
+        
+        L.circleMarker([20.2, 0.98], {
+            radius: 5,
+            fillColor: "#fee08b",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Tessalit</b><br>
+            Region: Kidal<br>
+            Risk Tier: Medium<br>
+            EDI Score: 0.211<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 111<br>
+            Events per 100k: 564.45
+        `);
+        
+        L.circleMarker([18.44, 1.41], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Kidal</b><br>
+            Region: Kidal<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.165<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 182<br>
+            Events per 100k: 441.23
+        `);
+        
+        L.circleMarker([16.88, -1.93], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Gourma-Rharous</b><br>
+            Region: Tombouctou<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.042<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 153<br>
+            Events per 100k: 111.8
+        `);
+        
+        L.circleMarker([14.25, -5.98], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Niono</b><br>
+            Region: Ségou<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.042<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 510<br>
+            Events per 100k: 113.4
+        `);
+        
+        L.circleMarker([14.11, -5.35], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Macina</b><br>
+            Region: Ségou<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.034<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 266<br>
+            Events per 100k: 91.42
+        `);
+        
+        L.circleMarker([19.47, 2.47], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Tin-Essako</b><br>
+            Region: Kidal<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.034<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 9<br>
+            Events per 100k: 91.03
+        `);
+        
+        L.circleMarker([16.41, -3.67], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Goundam</b><br>
+            Region: Tombouctou<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.026<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 130<br>
+            Events per 100k: 69.7
+        `);
+        
+        L.circleMarker([15.93, -3.98], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Niafunké</b><br>
+            Region: Tombouctou<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.022<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 130<br>
+            Events per 100k: 60.12
+        `);
+        
+        L.circleMarker([18.5, 3.0], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Ténenkou</b><br>
+            Region: Mopti<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.019<br><br>
+            Schools: 6 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 100<br>
+            Events per 100k: 49.8
+        `);
+        
+        L.circleMarker([13.28, -4.58], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Tominian</b><br>
+            Region: Ségou<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.012<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 87<br>
+            Events per 100k: 31.92
+        `);
+        
+        L.circleMarker([14.53, -9.18], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Diéma</b><br>
+            Region: Kayes<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.005<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 37<br>
+            Events per 100k: 14.18
+        `);
+        
+        L.circleMarker([13.45, -6.27], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Ségou</b><br>
+            Region: Ségou<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.005<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 120<br>
+            Events per 100k: 13.99
+        `);
+        
+        L.circleMarker([11.93, -8.42], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Kangaba</b><br>
+            Region: Koulikoro<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.004<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 13<br>
+            Events per 100k: 10.51
+        `);
+        
+        L.circleMarker([11.18, -8.15], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Yanfolila</b><br>
+            Region: Sikasso<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.004<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 28<br>
+            Events per 100k: 10.68
+        `);
+        
+        L.circleMarker([13.55, -8.03], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Kolokani</b><br>
+            Region: Koulikoro<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.003<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 25<br>
+            Events per 100k: 8.72
+        `);
+        
+        L.circleMarker([12.83, -11.23], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Kéniéba</b><br>
+            Region: Kayes<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.002<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 10<br>
+            Events per 100k: 4.12
+        `);
+        
+        L.circleMarker([15.23, -9.58], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Nioro</b><br>
+            Region: Kayes<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.002<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 18<br>
+            Events per 100k: 6.38
+        `);
+        
+        L.circleMarker([12.65, -8.0], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Bamako</b><br>
+            Region: Bamako<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.001<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 42<br>
+            Events per 100k: 1.88
+        `);
+        
+        L.circleMarker([13.37, -6.9], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Baraouéli</b><br>
+            Region: Ségou<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.001<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 9<br>
+            Events per 100k: 3.6
+        `);
+        
+        L.circleMarker([11.42, -7.48], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Bougouni</b><br>
+            Region: Sikasso<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.001<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 15<br>
+            Events per 100k: 2.65
+        `);
+        
+        L.circleMarker([12.7, -6.8], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Dioila</b><br>
+            Region: Koulikoro<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.001<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 13<br>
+            Events per 100k: 2.16
+        `);
+        
+        L.circleMarker([11.08, -6.88], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Kolondieba</b><br>
+            Region: Sikasso<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.001<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 5<br>
+            Events per 100k: 2.01
+        `);
+        
+        L.circleMarker([15.13, -10.57], {
+            radius: 5,
+            fillColor: "#1a9850",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map).bindPopup(`
+            <b>Cercle: Yélimané</b><br>
+            Region: Kayes<br>
+            Risk Tier: Low<br>
+            EDI Score: 0.001<br><br>
+            Schools: 0 (0 closed)<br>
+            % Closed: 0.0%<br>
+            Conflict Events: 7<br>
+            Events per 100k: 3.22
+        `);
+        
 
-  function getRadius(events) {
-    var e = parseInt(events) || 0;
-    return Math.max(e * 200, 8000);
-  }
-
-  var map = L.map("map").setView([17.0, -2.5], 6);
-
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap contributors",
-    maxZoom: 18
-  }).addTo(map);
-
-  mapData.forEach(function(d) {
-    if (!d.lat || !d.lng) return;
-    var circle = L.circle([d.lat, d.lng], {
-      radius: getRadius(d.events),
-      fillColor: getColor(d.risk),
-      color: "white",
-      weight: 1.5,
-      fillOpacity: 0.78
-    });
-    circle.bindPopup(
-      "<b style='font-size:14px'>" + d.cercle + "</b>" +
-      "<hr style='margin:4px 0'>" +
-      "<b>Region:</b> " + d.region + "<br>" +
-      "<b>EDI Score:</b> " + d.edi + "<br>" +
-      "<b>Risk Level:</b> <span style='color:" + getColor(d.risk) + ";font-weight:bold'>" + d.risk + "</span><br>" +
-      "<b>Conflict Events:</b> " + d.events + "<br>" +
-      "<b>Events per 100k:</b> " + d.per100k + "<br>" +
-      "<b>Population:</b> " + parseInt(d.pop).toLocaleString() + "<br>" +
-      "<b>Schools Closed:</b> " + d.closed + " of " + d.schools +
-      " (" + d.pct_closed + "%)"
-    );
-    circle.addTo(map);
-  });
-
-  // Title box
-  var titleBox = L.control({position: "topleft"});
-  titleBox.onAdd = function() {
-    var div = L.DomUtil.create("div", "info-box");
-    div.innerHTML =
-      "<h3>Mali Education Disruption Index</h3>" +
-      "<p>Conflict exposure vs. school functionality<br>" +
-      "Sources: ACLED, OCHA Mali, HDX &nbsp;|&nbsp; 2020–2024<br>" +
-      "Circle size = conflict event volume</p>";
-    return div;
-  };
-  titleBox.addTo(map);
-
-  // Legend
-  var legend = L.control({position: "bottomright"});
-  legend.onAdd = function() {
-    var div = L.DomUtil.create("div", "legend");
-    div.innerHTML =
-      "<div class='legend-title'>EDI Risk Level</div>" +
-      "<i style='background:#d73027'></i> Critical &nbsp;(EDI &ge; 0.7)<br>" +
-      "<i style='background:#fc8d59'></i> High &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(EDI &ge; 0.4)<br>" +
-      "<i style='background:#fee08b'></i> Medium &nbsp;(EDI &ge; 0.2)<br>" +
-      "<i style='background:#91cf60'></i> Low &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(EDI &lt; 0.2)";
-    return div;
-  };
-  legend.addTo(map);
-
-</script>
-</body>
-</html>
+            var legend = L.control({position: 'bottomright'});
+            legend.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'legend'),
+                    grades = ["Critical", "High", "Medium", "Low"],
+                    labels = {"Critical": "#d73027", "High": "#f46d43", "Medium": "#fee08b", "Low": "#1a9850"};
+                div.innerHTML = '<b>Risk Tiers</b><br>';
+                for (var i = 0; i < grades.length; i++) {
+                    div.innerHTML +=
+                        '<i style="background:' + labels[grades[i]] + '"></i> ' +
+                        grades[i] + '<br>';
+                }
+                return div;
+            };
+            legend.addTo(map);
+        </script>
+    </body>
+    </html>
+    
