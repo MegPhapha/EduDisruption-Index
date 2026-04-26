@@ -11,14 +11,13 @@ def generate_map():
                 row[key] = float(row[key])
             data.append(row)
 
-    # Sort data for the side panel (Top 5)
     top_5 = sorted(data, key=lambda x: x['edi'], reverse=True)[:5]
 
     colors = {
-        "Critical": "#b30000", # Deep Red
-        "High": "#e34a33",     # Orange Red
-        "Medium": "#fdbb84",   # Light Orange
-        "Low": "#2ca25f"       # Forest Green
+        "Critical": "#b30000",
+        "High": "#e34a33",
+        "Medium": "#fdbb84",
+        "Low": "#2ca25f"
     }
 
     markers_js = ""
@@ -89,15 +88,28 @@ def generate_map():
         </div>
         <div id="map"></div>
         <script>
-            var map = L.map('map', {{ zoomControl: false }}).setView([16.5, -4.0], 6);
+            var map = L.map('map', {{ zoomControl: false }}).setView([17.5, -4.0], 6);
             L.control.zoom({{ position: 'topright' }}).addTo(map);
 
-            // Clean CartoDB Light basemap
             L.tileLayer('https://{{s}}.basemaps.cartocdn.com/light_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 subdomains: 'abcd',
                 maxZoom: 20
             }}).addTo(map);
+
+            // BOLD BORDER FOR MALI
+            fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries/MLI.geojson')
+                .then(response => response.json())
+                .then(data => {{
+                    L.geoJSON(data, {{
+                        style: {{
+                            color: "#2c3e50",
+                            weight: 4,
+                            fillOpacity: 0.05,
+                            dashArray: '5, 10'
+                        }}
+                    }}).addTo(map);
+                }});
 
             {markers_js}
 
