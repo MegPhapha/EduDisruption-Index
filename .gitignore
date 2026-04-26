@@ -2,10 +2,14 @@
 data/raw/*
 !data/raw/.gitkeep
 
-# Temporary files
+# Temporary and Diagnostic scripts
+scripts/01_*
+scripts/03_*
+scripts/find_*
+scripts/sample_*
+scripts/scan_*
 *.json
 *.txt
-scripts/read_xlsx_minimal.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

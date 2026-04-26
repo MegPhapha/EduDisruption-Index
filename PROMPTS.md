@@ -30,6 +30,11 @@ This file documents the sequence of requests and the project's evolution.
 **User Update:** Encountered "access level" issues with ACLED's website.
 **Response:** Found and downloaded the ACLED Mali mirror from HDX (`acled_mali.csv`), ensuring the user has all necessary data without login barriers.
 
-### 8. Documentation
+### 9. Final Index Calculation
+**User:** "Now show me exactly what the first 5 rows... Do not use Excel or VLOOKUP. Use Python with only built-in libraries..."
+**Action:** Developed `scripts/02_build_index.py` using a stateful XML parser for XLSX files. Normalized all names to handle accents (e.g., 'Baraouéli' vs 'Baraoueli'). 
+**Result:** Successfully generated `data/clean/mali_disruption_summary.csv` with 50 Cercles. Identified Niono, Bourem, and Koro as top high-risk areas.
+
+### 10. Documentation
 **User:** "create a prompt file where you document all prompts used"
 **Action:** Updated `PROMPTS.md`.
