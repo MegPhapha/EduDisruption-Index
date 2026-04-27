@@ -97,15 +97,15 @@ def generate_map():
                 maxZoom: 20
             }}).addTo(map);
 
-            // BOLD, VERY CLEAR BORDER FOR MALI
-            fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries/MLI.geojson')
+            // HIGH RESOLUTION BOLD BORDER FOR MALI ONLY
+            fetch('https://github.com/wmgeolab/geoBoundaries/raw/main/releaseData/gbOpen/MLI/ADM0/geoBoundaries-MLI-ADM0.geojson')
                 .then(response => response.json())
                 .then(data => {{
                     L.geoJSON(data, {{
                         style: {{
-                            color: "#ff4500", // Bright Orange-Red for maximum visibility
-                            weight: 6,       // Very thick line
-                            fillOpacity: 0,
+                            color: "#000000", // Solid Black for maximum definition
+                            weight: 5,       // Thick border
+                            fillOpacity: 0.03,
                             opacity: 1
                         }}
                     }}).addTo(map);
