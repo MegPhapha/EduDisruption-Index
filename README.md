@@ -2,8 +2,6 @@
 A data-driven Education Disruption Index for Mali that combines conflict events, population distribution, and school accessibility to identify high-risk areas and support prioritisation of education interventions.
 
 
-Here’s a **strong, submission-ready README intro** tailored to your exam, your repo name (**Mali-EduDisruption-Index**), and the RFP logic:
-
 ---
 
 # 📍 Mali Education Disruption Index
