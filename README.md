@@ -24,27 +24,22 @@ The goal of this project is to support **evidence-based prioritization of educat
 
 ## 🧠 Approach
 
-The Education Disruption Index combines openly available datasets, including:
+The Education Disruption Index combines three openly available datasets:
 
-* Conflict event data from ACLED
-* School and infrastructure data from OpenStreetMap
-* Population distribution data from WorldPop
+* **Conflict events** — ACLED (2020–2024) via HDX
+* **School status** — OCHA Mali school registry via HDX
+* **Population** — OCHA admin-2 estimates via HDX
 
-These inputs are spatially analyzed to produce a **composite risk score** that highlights:
-
-* مناطق (regions) with high exposure to conflict
-* Areas with high concentrations of school-age populations
-* Locations with limited access to nearby schools
+These inputs are joined at the cercle level (Mali's admin-2 unit) to produce a **composite risk score** weighted 60% closures / 40% conflict-per-100k, plus an explicit **`data_coverage`** flag (`Full` / `Partial` / `Limited` / `Conflict-only`) so users see what evidence supports each cercle's assessment. Cercles with weak school coverage and modest conflict are routed to a **`Data-Limited`** tier instead of being mixed into the risk rankings on small-N noise.
 
 ---
 
 ## 📊 Output
 
-The main output is a **geospatial visualization** (map/dashboard) that:
+The visual artifact is a two-page interactive dashboard:
 
-* Identifies **high-risk zones for education disruption**
-* Highlights **gaps between school locations and population needs**
-* Supports rapid interpretation by non-technical users
+* **[Map](index.html)** — one marker per cercle, sized by EDI, coloured by tier; cercles with no school-data coverage are rendered with dashed outlines
+* **[Dashboard](dashboard.html)** — risk distribution, top-10 EDI cercles (Data-Limited excluded), and a **scatter chart** (conflict events per 100k vs % schools closed, by region) that visually separates cercles flagged by both signals from those flagged by only one
 
 🔗 *View the visual artifact:* [https://megphapha.github.io/EduDisruption-Index/](https://megphapha.github.io/EduDisruption-Index/)
 

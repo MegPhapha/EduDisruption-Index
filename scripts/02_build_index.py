@@ -18,7 +18,7 @@ official_cercles_norm = sorted(list(pop_lookup.keys()), key=len, reverse=True)
 CAPITAL_COORDS = {
     'abeibara': (19.0, 2.0), 'ansongo': (15.67, 0.50), 'bamako': (12.65, -8.00),
     'banamba': (13.55, -7.45), 'bandiagara': (14.35, -3.61), 'bankass': (14.08, -3.52),
-    'baraoueli': (13.37, -6.90), 'bla': (13.48, -5.77), 'bougouni': (11.42, -7.48),
+    'bafoulabe': (13.81, -10.83), 'baraoueli': (13.37, -6.90), 'bla': (13.48, -5.77), 'bougouni': (11.42, -7.48),
     'bourem': (18.97, 0.36), 'diema': (14.53, -9.18), 'dire': (16.27, -3.40),
     'dioila': (12.70, -6.80), 'djenne': (13.91, -4.56), 'douentza': (15.00, -2.95),
     'gao': (16.27, -0.04), 'goundam': (16.41, -3.67), 'gourma-rharous': (16.88, -1.93),
@@ -93,6 +93,12 @@ with zipfile.ZipFile('data/raw/acled_mali_summary.xlsx', 'r') as zip_ref:
                 except: pass
 
 # Finalize
+def classify_coverage(n):
+    if n >= 10: return 'Full'
+    if n >= 3: return 'Partial'
+    if n >= 1: return 'Limited'
+    return 'Conflict-only'
+
 final = []
 for k, p in pop_lookup.items():
     s, c = schools_stats[k], conflict_stats[k]
@@ -100,12 +106,13 @@ for k, p in pop_lookup.items():
     e_100k = (c['events']/p['pop']*100000) if p['pop']>0 else 0
     l, ln = CAPITAL_COORDS.get(k, (0,0))
     final.append({
-        'cercle': p['display_name'], 'region': p['region'], 
+        'cercle': p['display_name'], 'region': p['region'],
         'lat': l, 'lng': ln,
-        'total_schools': s['total'], 'closed_schools': s['closed'], 
+        'total_schools': s['total'], 'closed_schools': s['closed'],
         'pct_closed': round(p_cl, 2),
-        'total_conflict_events': c['events'], 'population': p['pop'], 
-        'events_per_100k': round(e_100k, 2)
+        'total_conflict_events': c['events'], 'population': p['pop'],
+        'events_per_100k': round(e_100k, 2),
+        'data_coverage': classify_coverage(s['total'])
     })
 
 m_pc = max([r['pct_closed'] for r in final]) if final else 1
@@ -113,24 +120,31 @@ m_ev = max([r['events_per_100k'] for r in final]) if final else 1
 
 for r in final:
     edi = round(((r['pct_closed']/m_pc if m_pc else 0)*0.6) + ((r['events_per_100k']/m_ev if m_ev else 0)*0.4), 3)
-    r['EDI_score'], r['risk_tier'] = edi, ("Critical" if edi>=0.7 else "High" if edi>=0.4 else "Medium" if edi>=0.2 else "Low")
+    r['EDI_score'] = edi
+    # Cercles with weak school coverage AND low conflict are flagged Data-Limited rather than mixed into the risk tiers.
+    # Conflict-only cercles with strong conflict signal (>=100 events/100k) keep their conflict-driven tier — the signal is real even without school data.
+    if r['data_coverage'] in ('Limited', 'Conflict-only') and r['events_per_100k'] < 100:
+        r['risk_tier'] = 'Data-Limited'
+    else:
+        r['risk_tier'] = ("Critical" if edi>=0.7 else "High" if edi>=0.4 else "Medium" if edi>=0.2 else "Low")
 
 final.sort(key=lambda x: x['EDI_score'], reverse=True)
 
 # Save
 os.makedirs('data/clean', exist_ok=True)
 with open('data/clean/mali_disruption_summary.csv', 'w', newline='', encoding='utf-8') as f:
-    dw = csv.DictWriter(f, fieldnames=['cercle','region','total_schools','closed_schools','pct_closed','total_conflict_events','population','events_per_100k','EDI_score','risk_tier'])
+    dw = csv.DictWriter(f, fieldnames=['cercle','region','total_schools','closed_schools','pct_closed','total_conflict_events','population','events_per_100k','EDI_score','risk_tier','data_coverage'])
     dw.writeheader()
     for r in final: dw.writerow({k:v for k,v in r.items() if k not in ['lat','lng']})
 
 with open('data/clean/mali_map_data.csv', 'w', newline='', encoding='utf-8') as f:
-    dw = csv.DictWriter(f, fieldnames=['cercle','region','lat','lng','edi','risk','total_schools','closed_schools','pct_closed','total_conflict_events','events_per_100k','population'])
+    dw = csv.DictWriter(f, fieldnames=['cercle','region','lat','lng','edi','risk','coverage','total_schools','closed_schools','pct_closed','total_conflict_events','events_per_100k','population'])
     dw.writeheader()
-    for r in final: 
+    for r in final:
         dw.writerow({
             'cercle':r['cercle'],'region':r['region'],'lat':r['lat'],'lng':r['lng'],
-            'edi':r['EDI_score'],'risk':r['risk_tier'],'total_schools':r['total_schools'],
+            'edi':r['EDI_score'],'risk':r['risk_tier'],'coverage':r['data_coverage'],
+            'total_schools':r['total_schools'],
             'closed_schools':r['closed_schools'],'pct_closed':r['pct_closed'],
             'total_conflict_events':r['total_conflict_events'],
             'events_per_100k':r['events_per_100k'],'population':r['population']
