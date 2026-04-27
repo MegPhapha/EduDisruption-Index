@@ -2,27 +2,34 @@
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Mali EDI Map</title>
+        <title>Mali EDI Dashboard</title>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></script>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
-            body { font-family: sans-serif; margin: 0; }
-            #map { height: 100vh; width: 100%; }
-            .nav-btn { position: absolute; top: 20px; right: 20px; z-index: 1000; background: #1a2a3a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-            .header-info { position: absolute; top: 20px; left: 60px; z-index: 1000; background: white; padding: 10px 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-            .header-info h1 { margin: 0; font-size: 18px; }
+            body { font-family: sans-serif; margin: 0; background: #f4f7f9; }
+            .header { background: #1a2a3a; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
+            .nav-link { color: #fee08b; text-decoration: none; font-weight: bold; border: 1px solid #fee08b; padding: 5px 15px; border-radius: 4px; }
+            .container { display: grid; grid-template-columns: 350px 1fr 350px; gap: 15px; padding: 15px; height: calc(100vh - 70px); }
+            .card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+            #map { border-radius: 8px; height: 100%; }
         </style>
     </head>
     <body>
-        <a href="dashboard.html" class="nav-btn">View Analytics Dashboard →</a>
-        <div class="header-info"><h1>Mali Education Disruption Index</h1></div>
-        <div id="map"></div>
+        <div class="header">
+            <h1>Mali EDI Analytics Dashboard</h1>
+            <a href="index.html" class="nav-link">← Back to Main Map</a>
+        </div>
+        <div class="container">
+            <div class="card"><h3>Risk Distribution</h3><canvas id="donut"></canvas></div>
+            <div id="map" class="card"></div>
+            <div class="card"><h3>Top 10 Risk Cercles</h3><canvas id="bar"></canvas><h3>Regional Conflict</h3><canvas id="reg"></canvas></div>
+        </div>
         <script>
             var map = L.map('map').setView([16.5, -4.0], 6);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CARTO' }).addTo(map);
-            fetch('https://github.com/wmgeolab/geoBoundaries/raw/main/releaseData/gbOpen/MLI/ADM0/geoBoundaries-MLI-ADM0.geojson').then(res => res.json()).then(geo => { L.geoJSON(geo, { style: { color: '#000', weight: 3, fillOpacity: 0 } }).addTo(map); });
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
             L.circleMarker([16.77, -3.0], {radius: 16.1, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 200px;'>
                 <h3 style='margin:0 0 5px 0;'>Tombouctou</h3>
@@ -674,6 +681,9 @@ L.circleMarker([15.13, -10.57], {radius: 6, fillColor: '#2ca25f', color: '#fff',
             </div>
         `);
 
+            new Chart(document.getElementById('donut'), { type: 'doughnut', data: { labels: ["Critical", "High", "Medium", "Low"], datasets: [{ data: [0, 23, 5, 22], backgroundColor: ["#b30000","#e34a33","#fdbb84","#2ca25f"] }] } });
+            new Chart(document.getElementById('bar'), { type: 'bar', data: { labels: ["Tombouctou", "M\u00e9naka", "Bourem", "Bankass", "Dir\u00e9", "Youwarou", "Yorosso", "Banamba", "Djenn\u00e9", "Koutiala"], datasets: [{ label: 'EDI', data: [0.644, 0.641, 0.623, 0.616, 0.61, 0.61, 0.609, 0.604, 0.603, 0.603], backgroundColor: '#1a2a3a' }] }, options: { indexAxis: 'y' } });
+            new Chart(document.getElementById('reg'), { type: 'bar', data: { labels: ["Bamako", "Gao", "Kayes", "Kidal", "Koulikoro", "Mopti", "Sikasso", "S\u00e9gou", "Tombouctou"], datasets: [{ label: 'Events', data: [42, 1328, 129, 438, 277, 2379, 206, 1038, 634], backgroundColor: '#fdbb84' }] } });
         </script>
     </body>
     </html>
