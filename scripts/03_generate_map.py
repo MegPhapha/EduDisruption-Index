@@ -41,10 +41,61 @@ def get_markers_js(data, colors):
         js += f"L.circleMarker([{r['lat']}, {r['lng']}], {{radius: {max(6, r['edi'] * 25)}, fillColor: '{color}', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}}).addTo(map).bindPopup(`{popup}`);\n"
     return js
 
+REGION_COLORS = {
+    'Bamako': '#e41a1c',
+    'Gao': '#377eb8',
+    'Kayes': '#4daf4a',
+    'Kidal': '#984ea3',
+    'Koulikoro': '#ff7f00',
+    'Mopti': '#a65628',
+    'Ségou': '#f781bf',
+    'Sikasso': '#666666',
+    'Tombouctou': '#17becf',
+}
+
+def build_scatter_datasets(data):
+    datasets = []
+    for region, color in REGION_COLORS.items():
+        full, gap = [], []
+        for r in data:
+            if r['region'] != region: continue
+            point = {
+                'x': max(0.1, r['events_per_100k']),
+                'y': r['pct_closed'],
+                'r': max(5, min(22, (r['population'] ** 0.5) / 60)),
+                'cercle': r['cercle'],
+                'edi': r['edi'],
+                'coverage': r['coverage'],
+                'risk': r['risk'],
+            }
+            if r['coverage'] in ('Limited', 'Conflict-only'):
+                gap.append(point)
+            else:
+                full.append(point)
+        if full:
+            datasets.append({
+                'label': region,
+                'data': full,
+                'backgroundColor': color + 'CC',
+                'borderColor': color,
+                'borderWidth': 1,
+            })
+        if gap:
+            datasets.append({
+                'label': region + ' (data-gap)',
+                'data': gap,
+                'backgroundColor': 'rgba(255,255,255,0.0)',
+                'borderColor': color,
+                'borderWidth': 2,
+                'borderDash': [4, 3],
+            })
+    return datasets
+
 def generate():
     data, regions_events, tier_counts, coverage_counts = load_data()
     colors = {"Critical": "#b30000", "High": "#e34a33", "Medium": "#fdbb84", "Low": "#2ca25f", "Data-Limited": "#999999"}
     markers_js = get_markers_js(data, colors)
+    scatter_datasets = build_scatter_datasets(data)
 
     # Top-10 EDI excluding Data-Limited so the headline ranking is defensible
     top_10 = sorted([d for d in data if d['risk'] != 'Data-Limited'], key=lambda x: x['edi'], reverse=True)[:10]
@@ -102,15 +153,13 @@ def generate():
 </html>
 """
 
-    # 2. DASHBOARD.HTML — 3-column single-screen layout matching screenshot.
+    # 2. DASHBOARD.HTML — 3-column single-screen layout. Map removed; scatter chart is centerpiece.
     dashboard_html = f"""<!DOCTYPE html>
 <html>
 <head>
     <title>Mali EDI Dashboard</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {{ --navy: #1a2a3a; --bg: #f4f7f9; --border: #e2e8f0; --muted: #4a5568; }}
@@ -129,10 +178,10 @@ def generate():
             height: calc(100vh - 64px);
         }}
         .card {{ background: white; border-radius: 8px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; flex-direction: column; min-height: 0; min-width: 0; overflow: hidden; }}
-        .card h3 {{ margin: 0 0 10px 0; font-size: 11px; font-weight: 700; color: var(--navy); letter-spacing: 0.6px; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }}
+        .card h3 {{ margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: var(--navy); letter-spacing: 0.6px; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }}
+        .card .sub {{ font-size: 11px; color: var(--muted); margin: 0 0 10px 0; line-height: 1.45; flex-shrink: 0; }}
         .chart-wrap {{ position: relative; flex: 1; min-height: 0; }}
-        .map-card {{ grid-row: 1 / span 2; padding: 0; border: 1px solid var(--navy); }}
-        #map {{ width: 100%; height: 100%; border-radius: 8px; }}
+        .scatter-card {{ grid-row: 1 / span 2; }}
         .note {{ font-size: 12px; line-height: 1.55; color: var(--muted); margin: 0; }}
         .note b {{ color: var(--navy); }}
         .note .stat {{ display: inline-block; padding: 1px 6px; background: #edf2f7; border-radius: 3px; font-weight: 600; color: var(--navy); }}
@@ -141,7 +190,7 @@ def generate():
 <body>
     <div class="header">
         <h1>Mali Education Disruption Index (EDI) Dashboard</h1>
-        <div class="meta">Data Period: 2020 – 2024 <a href="index.html">← Map View</a></div>
+        <div class="meta">Data Period: 2020 – 2024 <a href="index.html">View Map →</a></div>
     </div>
     <div class="container">
         <!-- Left column: donut (top), top-10 (bottom) -->
@@ -154,8 +203,12 @@ def generate():
             <div class="chart-wrap"><canvas id="bar"></canvas></div>
         </div>
 
-        <!-- Center: map spans both rows -->
-        <div class="card map-card"><div id="map"></div></div>
+        <!-- Center: scatter chart spans both rows -->
+        <div class="card scatter-card">
+            <h3>Conflict Intensity × School Closure</h3>
+            <p class="sub">Each bubble = one cercle. Size ∝ √population, color = region. <b>Hollow rings</b> mark cercles with limited or missing school-data coverage — closure signal not trustworthy. The chart separates two shortlists: cercles in the upper-right are flagged by both signals; cercles isolated on one axis tell EBI which signal is driving the assessment and where field verification matters most.</p>
+            <div class="chart-wrap"><canvas id="scatter"></canvas></div>
+        </div>
 
         <!-- Right column: regional bar (top), methodology note (bottom) -->
         <div class="card">
@@ -164,17 +217,12 @@ def generate():
         </div>
         <div class="card">
             <h3>Methodology Note</h3>
-            <p class="note">Circle <b>size</b> on map corresponds to the composite EDI score. <b>Color</b> indicates the risk tier.</p>
-            <p class="note" style="margin-top:8px;"><span class="stat">{n_data_limited} of {n_total}</span> cercles are flagged <b>Data-Limited</b> (grey) — school-data coverage is insufficient to assess closure rate, so triage relies on the conflict signal and field-team verification. These are excluded from the Top 10 ranking to keep the headline list defensible.</p>
-            <p class="note" style="margin-top:8px;"><b>Sources:</b> ACLED (2020–2024), OCHA Mali school registry, OCHA admin-2 population estimates — all open data via HDX.</p>
+            <p class="note"><span class="stat">{n_data_limited} of {n_total}</span> cercles are flagged <b>Data-Limited</b> — school-data coverage is insufficient to assess closure rate, so triage relies on the conflict signal and field-team verification. These are excluded from the Top 10 ranking to keep the headline list defensible.</p>
+            <p class="note" style="margin-top:8px;">EDI weights: <b>60%</b> percentage of matched schools closed; <b>40%</b> ACLED conflict events per 100k population (2020–2024).</p>
+            <p class="note" style="margin-top:8px;"><b>Sources:</b> ACLED, OCHA Mali school registry, OCHA admin-2 population estimates — all open data via HDX. Spatial view available on the <a href="index.html" style="color:var(--navy); font-weight:600;">map page</a>.</p>
         </div>
     </div>
     <script>
-        var map = L.map('map', {{ worldCopyJump: true }}).setView([15, -5], 3);
-        L.tileLayer('https://{{s}}.basemaps.cartocdn.com/light_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{ attribution: '&copy; CARTO' }}).addTo(map);
-        fetch('https://github.com/wmgeolab/geoBoundaries/raw/main/releaseData/gbOpen/MLI/ADM0/geoBoundaries-MLI-ADM0.geojson').then(res => res.json()).then(geo => {{ L.geoJSON(geo, {{ style: {{ color: '#000', weight: 2, fillOpacity: 0 }} }}).addTo(map); }});
-        {markers_js}
-
         new Chart(document.getElementById('donut'), {{
             type: 'doughnut',
             data: {{ labels: {json.dumps(tier_order)}, datasets: [{{ data: {json.dumps(tier_vals)}, backgroundColor: {json.dumps(tier_palette)}, borderWidth: 2, borderColor: '#fff' }}] }},
@@ -211,6 +259,22 @@ def generate():
                 scales: {{
                     x: {{ ticks: {{ font: {{ size: 10 }}, maxRotation: 45, minRotation: 45 }}, grid: {{ display: false }} }},
                     y: {{ beginAtZero: true, grid: {{ color: '#edf2f7' }} }}
+                }}
+            }}
+        }});
+
+        new Chart(document.getElementById('scatter'), {{
+            type: 'bubble',
+            data: {{ datasets: {json.dumps(scatter_datasets)} }},
+            options: {{
+                maintainAspectRatio: false,
+                scales: {{
+                    x: {{ type: 'logarithmic', title: {{ display: true, text: 'Conflict events per 100k population (log scale)', font: {{ size: 11 }} }}, grid: {{ color: '#edf2f7' }} }},
+                    y: {{ min: 0, max: 105, title: {{ display: true, text: '% of matched schools closed', font: {{ size: 11 }} }}, grid: {{ color: '#edf2f7' }} }}
+                }},
+                plugins: {{
+                    legend: {{ position: 'right', labels: {{ font: {{ size: 10 }}, boxWidth: 10, padding: 6 }} }},
+                    tooltip: {{ callbacks: {{ label: function(ctx) {{ var p = ctx.raw; return p.cercle + ' — EDI ' + p.edi + ' (' + p.risk + ', ' + p.coverage + ')'; }} }} }}
                 }}
             }}
         }});
