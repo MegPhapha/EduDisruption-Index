@@ -1,45 +1,43 @@
-
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Mali EDI Map</title>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <style>
-            body { font-family: sans-serif; margin: 0; }
-            #map { height: 100vh; width: 100%; }
-            .nav-btn { position: absolute; top: 20px; right: 20px; z-index: 1000; background: #1a2a3a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-            .header-info { position: absolute; top: 20px; left: 60px; z-index: 1000; background: white; padding: 10px 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 360px; }
-            .header-info h1 { margin: 0 0 4px 0; font-size: 16px; }
-            .header-info p { margin: 0; font-size: 12px; color: #444; }
-            .legend { position: absolute; bottom: 20px; left: 20px; z-index: 1000; background: white; padding: 10px 14px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 12px; }
-            .legend .row { display: flex; align-items: center; margin: 3px 0; }
-            .legend .swatch { width: 14px; height: 14px; border-radius: 50%; margin-right: 8px; border: 1px solid #fff; box-shadow: 0 0 0 1px #888; }
-            .legend .dashed { border: 2px dashed #555; background: transparent; box-shadow: none; }
-        </style>
-    </head>
-    <body>
-        <a href="dashboard.html" class="nav-btn">View Analytics Dashboard →</a>
-        <div class="header-info">
-            <h1>Mali Education Disruption Index</h1>
-            <p>Composite score combining ACLED conflict events and OCHA school closures, weighted by population. Dashed markers = limited school-data coverage; tier reflects conflict signal only.</p>
-        </div>
-        <div class="legend">
-            <div class="row"><span class="swatch" style="background:#b30000"></span>Critical</div>
-            <div class="row"><span class="swatch" style="background:#e34a33"></span>High</div>
-            <div class="row"><span class="swatch" style="background:#fdbb84"></span>Medium</div>
-            <div class="row"><span class="swatch" style="background:#2ca25f"></span>Low</div>
-            <div class="row"><span class="swatch" style="background:#999999"></span>Data-Limited</div>
-            <div class="row"><span class="swatch dashed"></span>Coverage gap</div>
-        </div>
-        <div id="map"></div>
-        <script>
-            var map = L.map('map').setView([16.5, -4.0], 6);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CARTO' }).addTo(map);
-            fetch('https://github.com/wmgeolab/geoBoundaries/raw/main/releaseData/gbOpen/MLI/ADM0/geoBoundaries-MLI-ADM0.geojson').then(res => res.json()).then(geo => { L.geoJSON(geo, { style: { color: '#000', weight: 3, fillOpacity: 0 } }).addTo(map); });
-            L.circleMarker([16.77, -3.0], {radius: 16.1, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mali EDI Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { font-family: -apple-system, 'Segoe UI', sans-serif; margin: 0; }
+        #map { height: 100vh; width: 100%; }
+        .nav-btn { position: absolute; top: 20px; right: 20px; z-index: 1000; background: #1a2a3a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .header-info { position: absolute; top: 20px; left: 60px; z-index: 1000; background: white; padding: 12px 16px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 380px; }
+        .header-info h1 { margin: 0 0 4px 0; font-size: 16px; color: #1a2a3a; }
+        .header-info p { margin: 0; font-size: 12px; color: #4a5568; line-height: 1.4; }
+        .legend { position: absolute; bottom: 20px; left: 20px; z-index: 1000; background: white; padding: 10px 14px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 12px; }
+        .legend .row { display: flex; align-items: center; margin: 3px 0; }
+        .legend .swatch { width: 14px; height: 14px; border-radius: 50%; margin-right: 8px; border: 1px solid #fff; box-shadow: 0 0 0 1px #888; }
+        .legend .dashed { border: 2px dashed #555; background: transparent; box-shadow: none; }
+    </style>
+</head>
+<body>
+    <a href="dashboard.html" class="nav-btn">View Analytics Dashboard →</a>
+    <div class="header-info">
+        <h1>Mali Education Disruption Index</h1>
+        <p>Composite score combining ACLED conflict events and OCHA school closures, weighted by population. Grey markers = Data-Limited cercles where school-data coverage is insufficient; tier reflects conflict signal only.</p>
+    </div>
+    <div class="legend">
+        <div class="row"><span class="swatch" style="background:#b30000"></span>Critical</div>
+        <div class="row"><span class="swatch" style="background:#e34a33"></span>High</div>
+        <div class="row"><span class="swatch" style="background:#fdbb84"></span>Medium</div>
+        <div class="row"><span class="swatch" style="background:#2ca25f"></span>Low</div>
+        <div class="row"><span class="swatch" style="background:#999999"></span>Data-Limited</div>
+    </div>
+    <div id="map"></div>
+    <script>
+        var map = L.map('map').setView([16.5, -4.0], 6);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CARTO' }).addTo(map);
+        fetch('https://github.com/wmgeolab/geoBoundaries/raw/main/releaseData/gbOpen/MLI/ADM0/geoBoundaries-MLI-ADM0.geojson').then(res => res.json()).then(geo => { L.geoJSON(geo, { style: { color: '#000', weight: 3, fillOpacity: 0 } }).addTo(map); });
+        L.circleMarker([16.77, -3.0], {radius: 16.1, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Tombouctou</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -54,7 +52,7 @@
                 </table>
             </div>
         `);
-L.circleMarker([15.92, 2.4], {radius: 16.025, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([15.92, 2.4], {radius: 16.025, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Ménaka</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -69,7 +67,7 @@ L.circleMarker([15.92, 2.4], {radius: 16.025, fillColor: '#e34a33', color: '#fff
                 </table>
             </div>
         `);
-L.circleMarker([18.97, 0.36], {radius: 15.575, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([18.97, 0.36], {radius: 15.575, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Bourem</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -84,7 +82,7 @@ L.circleMarker([18.97, 0.36], {radius: 15.575, fillColor: '#e34a33', color: '#ff
                 </table>
             </div>
         `);
-L.circleMarker([14.08, -3.52], {radius: 15.4, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([14.08, -3.52], {radius: 15.4, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Bankass</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -99,7 +97,7 @@ L.circleMarker([14.08, -3.52], {radius: 15.4, fillColor: '#e34a33', color: '#fff
                 </table>
             </div>
         `);
-L.circleMarker([16.27, -3.4], {radius: 15.25, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([16.27, -3.4], {radius: 15.25, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Diré</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -114,7 +112,7 @@ L.circleMarker([16.27, -3.4], {radius: 15.25, fillColor: '#e34a33', color: '#fff
                 </table>
             </div>
         `);
-L.circleMarker([15.25, -4.18], {radius: 15.25, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([15.25, -4.18], {radius: 15.25, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Youwarou</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -129,7 +127,7 @@ L.circleMarker([15.25, -4.18], {radius: 15.25, fillColor: '#e34a33', color: '#ff
                 </table>
             </div>
         `);
-L.circleMarker([12.37, -4.78], {radius: 15.225, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([12.37, -4.78], {radius: 15.225, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Yorosso</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -144,7 +142,7 @@ L.circleMarker([12.37, -4.78], {radius: 15.225, fillColor: '#e34a33', color: '#f
                 </table>
             </div>
         `);
-L.circleMarker([13.55, -7.45], {radius: 15.1, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([13.55, -7.45], {radius: 15.1, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Banamba</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -159,7 +157,7 @@ L.circleMarker([13.55, -7.45], {radius: 15.1, fillColor: '#999999', color: '#fff
                 </table>
             </div>
         `);
-L.circleMarker([13.91, -4.56], {radius: 15.075, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([13.91, -4.56], {radius: 15.075, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Djenné</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -174,7 +172,7 @@ L.circleMarker([13.91, -4.56], {radius: 15.075, fillColor: '#e34a33', color: '#f
                 </table>
             </div>
         `);
-L.circleMarker([12.39, -5.47], {radius: 15.075, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([12.39, -5.47], {radius: 15.075, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Koutiala</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -189,7 +187,7 @@ L.circleMarker([12.39, -5.47], {radius: 15.075, fillColor: '#e34a33', color: '#f
                 </table>
             </div>
         `);
-L.circleMarker([13.81, -10.83], {radius: 15.049999999999999, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([13.81, -10.83], {radius: 15.049999999999999, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Bafoulabe</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -204,7 +202,7 @@ L.circleMarker([13.81, -10.83], {radius: 15.049999999999999, fillColor: '#999999
                 </table>
             </div>
         `);
-L.circleMarker([11.33, -5.67], {radius: 15.049999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([11.33, -5.67], {radius: 15.049999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Sikasso</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -219,7 +217,7 @@ L.circleMarker([11.33, -5.67], {radius: 15.049999999999999, fillColor: '#e34a33'
                 </table>
             </div>
         `);
-L.circleMarker([13.48, -5.77], {radius: 15.024999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([13.48, -5.77], {radius: 15.024999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Bla</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -234,7 +232,7 @@ L.circleMarker([13.48, -5.77], {radius: 15.024999999999999, fillColor: '#e34a33'
                 </table>
             </div>
         `);
-L.circleMarker([14.45, -11.44], {radius: 15.024999999999999, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([14.45, -11.44], {radius: 15.024999999999999, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Kayes</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -249,7 +247,7 @@ L.circleMarker([14.45, -11.44], {radius: 15.024999999999999, fillColor: '#999999
                 </table>
             </div>
         `);
-L.circleMarker([15.67, 0.5], {radius: 14.924999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([15.67, 0.5], {radius: 14.924999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Ansongo</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -264,7 +262,7 @@ L.circleMarker([15.67, 0.5], {radius: 14.924999999999999, fillColor: '#e34a33', 
                 </table>
             </div>
         `);
-L.circleMarker([14.08, -3.08], {radius: 14.674999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([14.08, -3.08], {radius: 14.674999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Koro</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -279,7 +277,7 @@ L.circleMarker([14.08, -3.08], {radius: 14.674999999999999, fillColor: '#e34a33'
                 </table>
             </div>
         `);
-L.circleMarker([12.86, -7.56], {radius: 14.674999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([12.86, -7.56], {radius: 14.674999999999999, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Koulikoro</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -294,7 +292,7 @@ L.circleMarker([12.86, -7.56], {radius: 14.674999999999999, fillColor: '#e34a33'
                 </table>
             </div>
         `);
-L.circleMarker([13.03, -9.49], {radius: 13.55, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([13.03, -9.49], {radius: 13.55, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Kita</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -309,7 +307,7 @@ L.circleMarker([13.03, -9.49], {radius: 13.55, fillColor: '#e34a33', color: '#ff
                 </table>
             </div>
         `);
-L.circleMarker([13.3, -4.9], {radius: 13.325000000000001, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([13.3, -4.9], {radius: 13.325000000000001, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>San</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -324,7 +322,7 @@ L.circleMarker([13.3, -4.9], {radius: 13.325000000000001, fillColor: '#e34a33', 
                 </table>
             </div>
         `);
-L.circleMarker([15.0, -2.95], {radius: 13.225000000000001, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([15.0, -2.95], {radius: 13.225000000000001, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Douentza</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -339,7 +337,7 @@ L.circleMarker([15.0, -2.95], {radius: 13.225000000000001, fillColor: '#e34a33',
                 </table>
             </div>
         `);
-L.circleMarker([10.57, -5.7], {radius: 12.275, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([10.57, -5.7], {radius: 12.275, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Kadiolo</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -354,7 +352,7 @@ L.circleMarker([10.57, -5.7], {radius: 12.275, fillColor: '#e34a33', color: '#ff
                 </table>
             </div>
         `);
-L.circleMarker([14.35, -3.61], {radius: 11.425, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([14.35, -3.61], {radius: 11.425, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Bandiagara</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -369,7 +367,7 @@ L.circleMarker([14.35, -3.61], {radius: 11.425, fillColor: '#e34a33', color: '#f
                 </table>
             </div>
         `);
-L.circleMarker([19.0, 2.0], {radius: 10.0, fillColor: '#e34a33', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([19.0, 2.0], {radius: 10.0, fillColor: '#e34a33', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Abeibara</h3>
                 <span style='color:white; background:#e34a33; padding:2px 6px; border-radius:3px; font-size:11px;'>High</span>
@@ -384,7 +382,7 @@ L.circleMarker([19.0, 2.0], {radius: 10.0, fillColor: '#e34a33', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([15.17, -7.28], {radius: 9.45, fillColor: '#fdbb84', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([15.17, -7.28], {radius: 9.45, fillColor: '#fdbb84', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Nara</h3>
                 <span style='color:white; background:#fdbb84; padding:2px 6px; border-radius:3px; font-size:11px;'>Medium</span>
@@ -399,7 +397,7 @@ L.circleMarker([15.17, -7.28], {radius: 9.45, fillColor: '#fdbb84', color: '#fff
                 </table>
             </div>
         `);
-L.circleMarker([16.27, -0.04], {radius: 9.225, fillColor: '#fdbb84', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([16.27, -0.04], {radius: 9.225, fillColor: '#fdbb84', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Gao</h3>
                 <span style='color:white; background:#fdbb84; padding:2px 6px; border-radius:3px; font-size:11px;'>Medium</span>
@@ -414,7 +412,7 @@ L.circleMarker([16.27, -0.04], {radius: 9.225, fillColor: '#fdbb84', color: '#ff
                 </table>
             </div>
         `);
-L.circleMarker([12.75, -8.07], {radius: 9.025, fillColor: '#fdbb84', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([12.75, -8.07], {radius: 9.025, fillColor: '#fdbb84', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Kati</h3>
                 <span style='color:white; background:#fdbb84; padding:2px 6px; border-radius:3px; font-size:11px;'>Medium</span>
@@ -429,7 +427,7 @@ L.circleMarker([12.75, -8.07], {radius: 9.025, fillColor: '#fdbb84', color: '#ff
                 </table>
             </div>
         `);
-L.circleMarker([14.49, -4.19], {radius: 8.200000000000001, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([14.49, -4.19], {radius: 8.200000000000001, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Mopti</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -444,7 +442,7 @@ L.circleMarker([14.49, -4.19], {radius: 8.200000000000001, fillColor: '#999999',
                 </table>
             </div>
         `);
-L.circleMarker([20.2, 0.98], {radius: 6, fillColor: '#fdbb84', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([20.2, 0.98], {radius: 6, fillColor: '#fdbb84', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Tessalit</h3>
                 <span style='color:white; background:#fdbb84; padding:2px 6px; border-radius:3px; font-size:11px;'>Medium</span>
@@ -459,7 +457,7 @@ L.circleMarker([20.2, 0.98], {radius: 6, fillColor: '#fdbb84', color: '#fff', we
                 </table>
             </div>
         `);
-L.circleMarker([18.44, 1.41], {radius: 6, fillColor: '#2ca25f', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([18.44, 1.41], {radius: 6, fillColor: '#2ca25f', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Kidal</h3>
                 <span style='color:white; background:#2ca25f; padding:2px 6px; border-radius:3px; font-size:11px;'>Low</span>
@@ -474,7 +472,7 @@ L.circleMarker([18.44, 1.41], {radius: 6, fillColor: '#2ca25f', color: '#fff', w
                 </table>
             </div>
         `);
-L.circleMarker([16.88, -1.93], {radius: 6, fillColor: '#2ca25f', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([16.88, -1.93], {radius: 6, fillColor: '#2ca25f', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Gourma-Rharous</h3>
                 <span style='color:white; background:#2ca25f; padding:2px 6px; border-radius:3px; font-size:11px;'>Low</span>
@@ -489,7 +487,7 @@ L.circleMarker([16.88, -1.93], {radius: 6, fillColor: '#2ca25f', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([14.25, -5.98], {radius: 6, fillColor: '#2ca25f', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([14.25, -5.98], {radius: 6, fillColor: '#2ca25f', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Niono</h3>
                 <span style='color:white; background:#2ca25f; padding:2px 6px; border-radius:3px; font-size:11px;'>Low</span>
@@ -504,7 +502,7 @@ L.circleMarker([14.25, -5.98], {radius: 6, fillColor: '#2ca25f', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([14.11, -5.35], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([14.11, -5.35], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Macina</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -519,7 +517,7 @@ L.circleMarker([14.11, -5.35], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([19.47, 2.47], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([19.47, 2.47], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Tin-Essako</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -534,7 +532,7 @@ L.circleMarker([19.47, 2.47], {radius: 6, fillColor: '#999999', color: '#fff', w
                 </table>
             </div>
         `);
-L.circleMarker([16.41, -3.67], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([16.41, -3.67], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Goundam</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -549,7 +547,7 @@ L.circleMarker([16.41, -3.67], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([15.93, -3.98], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([15.93, -3.98], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Niafunké</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -564,7 +562,7 @@ L.circleMarker([15.93, -3.98], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([14.52, -4.92], {radius: 6, fillColor: '#2ca25f', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.8}).addTo(map).bindPopup(`
+L.circleMarker([14.52, -4.92], {radius: 6, fillColor: '#2ca25f', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Ténenkou</h3>
                 <span style='color:white; background:#2ca25f; padding:2px 6px; border-radius:3px; font-size:11px;'>Low</span>
@@ -579,7 +577,7 @@ L.circleMarker([14.52, -4.92], {radius: 6, fillColor: '#2ca25f', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([13.28, -4.58], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([13.28, -4.58], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Tominian</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -594,7 +592,7 @@ L.circleMarker([13.28, -4.58], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([14.53, -9.18], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([14.53, -9.18], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Diéma</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -609,7 +607,7 @@ L.circleMarker([14.53, -9.18], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([13.45, -6.27], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([13.45, -6.27], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Ségou</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -624,7 +622,7 @@ L.circleMarker([13.45, -6.27], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([11.93, -8.42], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([11.93, -8.42], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Kangaba</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -639,7 +637,7 @@ L.circleMarker([11.93, -8.42], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([11.18, -8.15], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([11.18, -8.15], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Yanfolila</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -654,7 +652,7 @@ L.circleMarker([11.18, -8.15], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([13.55, -8.03], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([13.55, -8.03], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Kolokani</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -669,7 +667,7 @@ L.circleMarker([13.55, -8.03], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([12.83, -11.23], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([12.83, -11.23], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Kéniéba</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -684,7 +682,7 @@ L.circleMarker([12.83, -11.23], {radius: 6, fillColor: '#999999', color: '#fff',
                 </table>
             </div>
         `);
-L.circleMarker([15.23, -9.58], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([15.23, -9.58], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Nioro</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -699,7 +697,7 @@ L.circleMarker([15.23, -9.58], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([12.65, -8.0], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([12.65, -8.0], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Bamako</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -714,7 +712,7 @@ L.circleMarker([12.65, -8.0], {radius: 6, fillColor: '#999999', color: '#fff', w
                 </table>
             </div>
         `);
-L.circleMarker([13.37, -6.9], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([13.37, -6.9], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Baraouéli</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -729,7 +727,7 @@ L.circleMarker([13.37, -6.9], {radius: 6, fillColor: '#999999', color: '#fff', w
                 </table>
             </div>
         `);
-L.circleMarker([11.42, -7.48], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([11.42, -7.48], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Bougouni</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -744,7 +742,7 @@ L.circleMarker([11.42, -7.48], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([12.7, -6.8], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([12.7, -6.8], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Dioila</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -759,7 +757,7 @@ L.circleMarker([12.7, -6.8], {radius: 6, fillColor: '#999999', color: '#fff', we
                 </table>
             </div>
         `);
-L.circleMarker([11.08, -6.88], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([11.08, -6.88], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Kolondieba</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -774,7 +772,7 @@ L.circleMarker([11.08, -6.88], {radius: 6, fillColor: '#999999', color: '#fff', 
                 </table>
             </div>
         `);
-L.circleMarker([15.13, -10.57], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, dashArray: '4,4', opacity: 1, fillOpacity: 0.45}).addTo(map).bindPopup(`
+L.circleMarker([15.13, -10.57], {radius: 6, fillColor: '#999999', color: '#fff', weight: 1, opacity: 1, fillOpacity: 0.85}).addTo(map).bindPopup(`
             <div style='font-family: Arial; min-width: 230px;'>
                 <h3 style='margin:0 0 5px 0;'>Yélimané</h3>
                 <span style='color:white; background:#999999; padding:2px 6px; border-radius:3px; font-size:11px;'>Data-Limited</span>
@@ -790,7 +788,6 @@ L.circleMarker([15.13, -10.57], {radius: 6, fillColor: '#999999', color: '#fff',
             </div>
         `);
 
-        </script>
-    </body>
-    </html>
-    
+    </script>
+</body>
+</html>
