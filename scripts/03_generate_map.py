@@ -105,7 +105,14 @@ def generate():
     tier_vals = [tier_counts.get(t, 0) for t in tier_order]
     tier_palette = [colors[t] for t in tier_order]
     n_data_limited = tier_counts.get('Data-Limited', 0)
+    n_high = tier_counts.get('High', 0)
     n_total = sum(tier_counts.values())
+
+    # Stats for the "Mali at a Glance" callout card
+    top_cercle = top_10[0]['cercle'] if top_10 else '—'
+    top_edi = top_10[0]['edi'] if top_10 else 0
+    top_region = max(regions_events, key=regions_events.get) if regions_events else '—'
+    top_region_events = regions_events[top_region] if regions_events else 0
 
     # 1. INDEX.HTML — main map
     index_html = f"""<!DOCTYPE html>
@@ -181,10 +188,14 @@ def generate():
         .card h3 {{ margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: var(--navy); letter-spacing: 0.6px; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }}
         .card .sub {{ font-size: 11px; color: var(--muted); margin: 0 0 10px 0; line-height: 1.45; flex-shrink: 0; }}
         .chart-wrap {{ position: relative; flex: 1; min-height: 0; }}
-        .scatter-card {{ grid-row: 1 / span 2; }}
         .note {{ font-size: 12px; line-height: 1.55; color: var(--muted); margin: 0; }}
         .note b {{ color: var(--navy); }}
         .note .stat {{ display: inline-block; padding: 1px 6px; background: #edf2f7; border-radius: 3px; font-weight: 600; color: var(--navy); }}
+        .stats-grid {{ display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; flex: 1; min-height: 0; }}
+        .stat {{ display: flex; flex-direction: column; justify-content: center; padding: 8px 10px; background: #f7fafc; border-radius: 6px; border-left: 3px solid var(--navy); min-height: 0; }}
+        .stat-num {{ font-size: 26px; font-weight: 700; color: var(--navy); line-height: 1; }}
+        .stat-label {{ font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.3; text-transform: none; letter-spacing: 0; font-weight: 400; }}
+        .stat-label .sublabel {{ display: block; color: #718096; font-size: 9px; margin-top: 1px; }}
     </style>
 </head>
 <body>
@@ -193,33 +204,52 @@ def generate():
         <div class="meta">Data Period: 2020 – 2024 <a href="index.html">View Map →</a></div>
     </div>
     <div class="container">
-        <!-- Left column: donut (top), top-10 (bottom) -->
+        <!-- Top row: Top 10 (left), Scatter (middle, landscape), Region (right) -->
+        <div class="card">
+            <h3>Top 10 Risk Cercles (EDI)</h3>
+            <div class="chart-wrap"><canvas id="bar"></canvas></div>
+        </div>
+        <div class="card">
+            <h3>Conflict Intensity × School Closure</h3>
+            <p class="sub">Each bubble = one cercle. Size ∝ √population, color = region. <b>Hollow rings</b> mark cercles with limited or missing school-data coverage. Upper-right = both signals firing; right edge alone = conflict-only watch list.</p>
+            <div class="chart-wrap"><canvas id="scatter"></canvas></div>
+        </div>
+        <div class="card">
+            <h3>Conflict Events by Region</h3>
+            <div class="chart-wrap"><canvas id="reg"></canvas></div>
+        </div>
+
+        <!-- Bottom row: Donut (left), Stats callout (middle), Methodology (right) -->
         <div class="card">
             <h3>Risk Distribution</h3>
             <div class="chart-wrap"><canvas id="donut"></canvas></div>
         </div>
         <div class="card">
-            <h3>Top 10 Risk Cercles (EDI)</h3>
-            <div class="chart-wrap"><canvas id="bar"></canvas></div>
-        </div>
-
-        <!-- Center: scatter chart spans both rows -->
-        <div class="card scatter-card">
-            <h3>Conflict Intensity × School Closure</h3>
-            <p class="sub">Each bubble = one cercle. Size ∝ √population, color = region. <b>Hollow rings</b> mark cercles with limited or missing school-data coverage — closure signal not trustworthy. The chart separates two shortlists: cercles in the upper-right are flagged by both signals; cercles isolated on one axis tell EBI which signal is driving the assessment and where field verification matters most.</p>
-            <div class="chart-wrap"><canvas id="scatter"></canvas></div>
-        </div>
-
-        <!-- Right column: regional bar (top), methodology note (bottom) -->
-        <div class="card">
-            <h3>Conflict Events by Region</h3>
-            <div class="chart-wrap"><canvas id="reg"></canvas></div>
+            <h3>Mali at a Glance</h3>
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="stat-num">{n_high}</div>
+                    <div class="stat-label">High-risk cercles<span class="sublabel">act-now list</span></div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">{n_data_limited}</div>
+                    <div class="stat-label">Data-Limited cercles<span class="sublabel">need field verification</span></div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">{top_edi}</div>
+                    <div class="stat-label">Highest EDI<span class="sublabel">{top_cercle}</span></div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">{top_region_events:,}</div>
+                    <div class="stat-label">Most conflict events<span class="sublabel">{top_region} region (2020–2024)</span></div>
+                </div>
+            </div>
         </div>
         <div class="card">
             <h3>Methodology Note</h3>
-            <p class="note"><span class="stat">{n_data_limited} of {n_total}</span> cercles are flagged <b>Data-Limited</b> — school-data coverage is insufficient to assess closure rate, so triage relies on the conflict signal and field-team verification. These are excluded from the Top 10 ranking to keep the headline list defensible.</p>
-            <p class="note" style="margin-top:8px;">EDI weights: <b>60%</b> percentage of matched schools closed; <b>40%</b> ACLED conflict events per 100k population (2020–2024).</p>
-            <p class="note" style="margin-top:8px;"><b>Sources:</b> ACLED, OCHA Mali school registry, OCHA admin-2 population estimates — all open data via HDX. Spatial view available on the <a href="index.html" style="color:var(--navy); font-weight:600;">map page</a>.</p>
+            <p class="note"><span class="stat">{n_data_limited} of {n_total}</span> cercles are flagged <b>Data-Limited</b> — school-data coverage is insufficient to assess closure rate, so triage relies on the conflict signal and field-team verification. Excluded from Top 10 to keep the headline list defensible.</p>
+            <p class="note" style="margin-top:8px;">EDI weights: <b>60%</b> matched-school closure rate; <b>40%</b> ACLED events / 100k (2020–2024).</p>
+            <p class="note" style="margin-top:8px;"><b>Sources:</b> ACLED, OCHA Mali school registry, OCHA admin-2 population — all via HDX. Spatial view on the <a href="index.html" style="color:var(--navy); font-weight:600;">map page</a>.</p>
         </div>
     </div>
     <script>
