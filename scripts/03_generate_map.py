@@ -130,7 +130,9 @@ def generate():
     <style>
         body {{ font-family: -apple-system, 'Segoe UI', sans-serif; margin: 0; }}
         #map {{ height: 100vh; width: 100%; }}
-        .nav-btn {{ position: absolute; top: 20px; right: 20px; z-index: 1000; background: #1a2a3a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }}
+        .nav-btn {{ position: absolute; top: 20px; right: 20px; z-index: 1000; background: #fee08b; color: #1a2a3a; padding: 14px 22px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 15px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(0,0,0,0.25), 0 0 0 3px rgba(254, 224, 139, 0.35); transition: transform 0.15s ease, box-shadow 0.15s ease; display: inline-flex; align-items: center; gap: 8px; }}
+        .nav-btn:hover {{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.3), 0 0 0 4px rgba(254, 224, 139, 0.5); }}
+        .nav-btn .icon {{ font-size: 18px; line-height: 1; }}
         .header-info {{ position: absolute; top: 20px; left: 60px; z-index: 1000; background: white; padding: 12px 16px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 380px; }}
         .header-info h1 {{ margin: 0 0 4px 0; font-size: 16px; color: #1a2a3a; }}
         .header-info p {{ margin: 0; font-size: 12px; color: #4a5568; line-height: 1.4; }}
@@ -141,7 +143,7 @@ def generate():
     </style>
 </head>
 <body>
-    <a href="dashboard.html" class="nav-btn">View Analytics Dashboard →</a>
+    <a href="dashboard.html" class="nav-btn"><span class="icon">📊</span>Open Analytics Dashboard →</a>
     <div class="header-info">
         <h1>Mali Education Disruption Index</h1>
         <p>Composite score combining ACLED conflict events and OCHA school closures, weighted by population. Grey markers = Data-Limited cercles where school-data coverage is insufficient; tier reflects conflict signal only.</p>
