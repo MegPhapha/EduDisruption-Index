@@ -3,7 +3,8 @@
 **Prepared for:** Education Bridge Initiative (EBI)
 **Date:** April 27, 2026
 **Visual artifact:** https://megphapha.github.io/EduDisruption-Index/
-**Repository:** https://github.com/megphapha/EduDisruption-Index
+**Repository:** https://github.com/MegPhapha/EduDisruption-Index
+**Technical reference:** [METHODOLOGY.md](METHODOLOGY.md)
 
 ---
 
@@ -16,8 +17,8 @@ Education systems in Mali face compounding pressure from a decade of armed confl
 A first-pass review of the open data landscape for Mali surfaces the core problem this proposal addresses:
 
 - **ACLED** records every conflict event but says nothing about whether schools are open. Some of the country's highest event rates per capita are in cercles where, on its own, ACLED looks like a sufficient signal — Abeibara, Tessalit, Kidal — but field teams know that "high conflict rate" in a near-empty cercle is a different decision problem than "high conflict rate" in a populated one.
-- **OCHA's school registry** records facility status but covers cercles unevenly. Of Mali's 50 cercles, automated joining against the registry produces full coverage for 14, partial coverage for 9, and weak or no coverage for 27. A closure-rate ranking built on this data alone produces misleading shortlists: Bafoulabé and Kayes appear "100% closed" because only 1–2 schools matched, while Niono — with 510 conflict events — appears to have no closures at all because no schools matched.
-- **WorldPop / OCHA population** estimates are reliable but are only useful in combination with the other two — population without a hazard signal is just demography.
+- **OCHA's school registry** records facility status but covers cercles unevenly. Of Mali's 50 cercles, automated joining produces full coverage for 14, partial for 9, and weak or no coverage for 27. A closure-rate ranking built on this data alone would falsely place Bafoulabé and Kayes in the top 10 (N=2 and N=1 schools matched, both 100% closed), while Niono — with 510 conflict events — would appear to have no closures because no schools matched at all.
+- **WorldPop / OCHA population** estimates are reliable but only useful in combination with the other two — population without a hazard signal is just demography.
 
 The conclusion EBI's preliminary mapping exercise reached — that open data plus the right analytical tooling could meaningfully strengthen prioritisation — is correct. But it depends on a piece of analytical discipline that single-source maps don't provide: **knowing which cercles have enough data behind their assessment, and which are flagged on a partial signal that field teams are the only ones positioned to verify.**
 
@@ -25,64 +26,86 @@ The conclusion EBI's preliminary mapping exercise reached — that open data plu
 
 This project delivers a composite **Education Disruption Index (EDI)** for Mali that:
 
-1. Combines ACLED conflict events, OCHA school closure records, and population estimates into a single 0–1 score per cercle (the unit at which EBI plans).
+1. Combines ACLED conflict events, ACLED fatalities, OCHA school closure records, and population estimates into a single 0–1 score per cercle (the unit at which EBI plans).
 2. Carries an explicit **`data_coverage`** flag alongside the score (`Full`, `Partial`, `Limited`, `Conflict-only`) so users see not just *what* the index says but *what evidence supports it*.
-3. Produces three different but consistent shortlists from the same data:
-   - The **"act now" list** — cercles where multiple signals fire and coverage is sufficient (the High tier)
-   - The **"verify with field teams" list** — cercles where one signal fires hard but coverage is weak (the Data-Limited tier)
-   - The **conflict-only watch list** — cercles with severe ACLED activity and no school-registry match, where field teams are the only available source of education-status information
+3. Surfaces three different but consistent shortlists from the same data:
+   - The **Critical Tier** — top 5 cercles with reliable coverage; the act-now list
+   - The **Data-Limited** flag — cercles where one signal fires hard but coverage is weak; the verify-with-field-teams list
+   - The **Conflict-only watch list** — cercles with severe ACLED activity and no school-registry match, where field teams are the only available source of education-status information
 
 ### Proposed Approach
 
-**Composite scoring.** Each cercle receives an EDI score combining two normalised inputs: (a) percentage of matched schools currently closed (60% weight) and (b) conflict events per 100k population over 2020–2024 (40% weight). The closure weight is higher because closure is a more direct measure of education disruption than violence rates; the conflict weight is non-zero because it captures access barriers (route safety, displacement) that closure data alone misses.
+**Composite scoring.** EDI = 0.5 × closure-rate + 0.25 × events / 100k + 0.25 × fatalities / 100k. Each input normalised to its dataset maximum so EDI ∈ [0, 1]. Closure rate carries the highest weight because it is the most direct measure of education disruption rather than a precondition. Events and fatalities together carry the same weight (50/50): events capture *frequency* of insecurity, fatalities capture *severity*. Including both prevents the index from being driven by event count alone, where a single high-casualty attack would otherwise weigh the same as a brief skirmish.
 
-**Tiering with a data-coverage gate.** The EDI score determines a base tier (`Critical ≥ 0.7`, `High ≥ 0.4`, `Medium ≥ 0.2`, `Low < 0.2`). Cercles with weak school coverage (< 3 schools matched) and modest conflict rate (< 100 events / 100k) are routed to a **`Data-Limited`** tier instead. This prevents the small-N closure inflation that would otherwise push cercles like Bafoulabé (2 schools, both closed → "100% closed") into the High tier on noise. Cercles with weak coverage but severe conflict (e.g., Tessalit at 564/100k) keep their conflict-driven tier — because the conflict signal alone is severe enough to act on, with the coverage flag making the limitation visible.
+**Tiering with a data-coverage gate.** Cercles with weak school coverage (< 3 schools matched) AND modest conflict rate (< 100 events / 100k) are routed to a **`Data-Limited`** tier instead of being scored against the main thresholds. This prevents small-N closure inflation. Cercles with weak coverage but severe conflict (e.g., Tessalit at 564 events / 100k) keep their conflict-driven tier — the signal alone is severe enough to act on, with the coverage flag making the limitation visible.
 
-**Visual prioritisation.** The output is a single dashboard with three connected views and a separate full-screen map:
+**Critical Tier.** After tiering, the top 5 cercles by EDI with `coverage in ('Full', 'Partial')` are reassigned to Critical. Hard-coded count, not a score threshold; gives a defensible 5-cercle headline list regardless of where score boundaries fall.
 
-- A **bubble scatter** (centerpiece of the dashboard) plotting conflict events per 100k against school-closure rate, with each cercle as one bubble. Size scales with √population, colour marks the region, and **hollow rings** flag cercles where school-data coverage is too thin for the closure signal to be trusted. Reading guide below.
-- A **donut, top-10 bar, and regional bar** alongside the scatter, plus a "Mali at a Glance" callout summarising the headline numbers (20 High-risk cercles, 22 Data-Limited, top cercle, top region).
-- A separate **full-screen interactive map** with one marker per cercle, sized by EDI and coloured by tier (grey markers = Data-Limited cercles where the assessment rests on the conflict signal alone). Hovering or clicking a cercle surfaces its coverage classification, schools matched, closure rate, and conflict count.
+**Visual prioritisation.** The output is a single dashboard plus a separate full-screen map:
 
-**Reading the bubble chart.** The scatter is built so that each cercle's *position* on the chart names its risk profile. Walk it through four corners:
+- A **bubble scatter** (centerpiece of the dashboard) plotting conflict events per 100k against school-closure rate, with each cercle as one bubble. Size scales with √population, colour marks the region, and **hollow rings** flag cercles where school-data coverage is too thin for the closure signal to be trusted.
+- A **donut, top-10 bar (Critical bars in dark red), and regional bar** alongside the scatter, plus a "Mali at a Glance" callout summarising the headline numbers (5 Critical cercles, 22 Data-Limited, top cercle, top region).
+- A separate **full-screen interactive map** with one marker per cercle, sized by EDI and coloured by tier (grey markers = Data-Limited cercles where the assessment rests on the conflict signal alone). Clicking a cercle surfaces its coverage, schools matched, closure rate, conflict count, and fatality count.
 
-- **Upper-right (filled bubbles).** Both signals fire — conflict severe *and* closures widespread. The act-now shortlist: Tombouctou, Bankass, Ménaka, Ansongo, Djenné.
-- **Upper-left (filled).** Closures without much conflict — where displacement, teacher absence, or supply-chain failure shows up first. In Mali these are mostly small-N artifacts and route to Data-Limited; in another country with reliable school records this corner would be substantively populated.
-- **Right edge (hollow rings).** Severe conflict, no school-registry match — Abeibara (1,072 events / 100k), Tessalit (564), Kidal (441), Niono (113). The conflict-only watch list, where field-team knowledge is the only available evidence on education status.
-- **Lower-left.** Low on both signals. No urgent action.
+**Reading the bubble chart.** The scatter is built so that each cercle's *position* on the chart names its risk profile:
 
-If conflict and closures tracked the same cercles, the bubbles would form a diagonal from lower-left to upper-right. They form an **L-shape** instead — filled bubbles climbing through the middle, hollow rings stretching along the right edge. That gap is the methodology argument made visually: a single-source ranking would surface the wrong cercles, but the composite EDI with explicit coverage flags surfaces both shortlists distinctly and tells field staff which signal is driving each cercle's tier.
+- **Upper-right (filled bubbles)** — both signals fire. The Critical Tier sits here.
+- **Upper-left (filled)** — closures without much conflict; in Mali these are mostly small-N artifacts and route to Data-Limited.
+- **Right edge (hollow rings)** — severe conflict, no school-registry match (Abeibara, Tessalit, Kidal, Niono). The conflict-only watch list.
+- **Lower-left** — low on both signals. No urgent action.
 
-A **top-10 ranked list** sits beside the scatter and explicitly excludes Data-Limited cercles, so the headline shortlist EBI staff would screenshot is defensible without further caveat.
+If conflict and closures tracked the same cercles, the bubbles would form a diagonal. They form an **L-shape** instead, with hollow rings stretching along the right edge and filled bubbles climbing through the middle. That gap is the methodology argument made visually: a single-source ranking would surface the wrong cercles, but the composite EDI with explicit coverage flags surfaces both shortlists distinctly.
+
+A **top-10 ranked list** sits beside the scatter and explicitly excludes Data-Limited cercles. Critical Tier cercles in this list are bar-coloured red; the rest navy.
+
+See [METHODOLOGY.md](METHODOLOGY.md) for full technical detail on data cleaning, weight derivation, coverage thresholds, tier rules, the sensitivity check, and known limitations.
 
 ### Activities
 
 - **Data integration** — Normalise French-accented administrative names across three sources with mismatched spellings (`Baraouéli` ↔ `baraoueli`; `Niafunké` ↔ `Niafunke`); reconcile cercle codes to a single authoritative list of 50.
-- **Schools matching** — Parse a non-standard multi-header XLSX from the Ministry of Education; flag cercles where automated matching yields fewer than 3 records.
-- **Conflict aggregation** — Sum ACLED events per cercle for the 2020–2024 window; normalise per 100k population.
-- **Composite scoring + coverage classification** — Compute EDI and assign tiers under the data-coverage rule.
-- **Visualisation** — Render the map, scatter, and dashboard as static HTML with no server runtime, deployed via GitHub Pages.
+- **Schools matching** — Parse a non-standard multi-header XLSX from the Ministry of Education; classify each cercle's coverage (Full / Partial / Limited / Conflict-only).
+- **Conflict aggregation** — Sum ACLED events and fatalities per cercle for the 2020–2024 window; normalise per 100k population.
+- **Composite scoring + Critical Tier assignment** — Compute EDI under the 50/25/25 weighting, apply the Data-Limited gate, then reassign the top 5 reliable cercles to Critical.
+- **Sensitivity check** — Re-run the full pipeline restricted to 2022–2024 (recent half) to test the ranking's stability across time windows.
+- **Visualisation** — Render the dashboard and map as static HTML with no server runtime, deployed via GitHub Pages.
 
 ### Deliverables
 
-1. **Cleaned EDI dataset** (`mali_disruption_summary.csv`) — 50 cercles × 11 columns including the `data_coverage` flag.
-2. **Interactive dashboard** with map + scatter + ranked list, designed to be read by non-technical staff.
-3. **Reproducible Python pipeline** (`scripts/02_build_index.py`, `scripts/03_generate_map.py`) — under 300 lines total, using only the standard library and Chart.js / Leaflet via CDN; no proprietary dependencies.
-4. **Source documentation** (`data/raw/SOURCES.md`) — provenance, licences, and known limitations of every input.
+1. **Cleaned EDI dataset** (`data/clean/mali_disruption_summary.csv`) — 50 cercles × 13 columns including the `data_coverage` flag, fatalities, and risk tier.
+2. **Sensitivity comparison dataset** (`data/clean/*_2022_2024.csv`) — same schema, restricted to recent half.
+3. **Interactive dashboard** with bubble scatter as the centerpiece, plus donut, top-10 bar (Critical highlighted), regional bar, "Mali at a Glance" callout, and methodology note. Single-screen layout designed to be read by non-technical staff.
+4. **Full-screen interactive map** linked from the dashboard.
+5. **Reproducible Python pipeline** (`scripts/02_build_index.py`, `scripts/03_generate_map.py`) — using only the standard library and Chart.js / Leaflet via CDN. No proprietary dependencies.
+6. **Technical methodology reference** ([METHODOLOGY.md](METHODOLOGY.md)) — data sourcing, cleaning decisions, formula derivation, tier rules, sensitivity check, and known limitations.
 
 ---
 
 ## 2. Use of Technology
 
-The project uses AI not as a single feature but as a tool applied at three points where automation removes a manual bottleneck.
+The project uses AI as a code-and-prose accelerator with all analytical decisions made by a human reviewer. The boundary is explicit:
 
-**AI-assisted data extraction.** The Ministry of Education school registry is distributed as a multi-sheet XLSX with three metadata rows above the header, sparse forward-fill columns, and shared-string XML internals. An LLM was used to author a custom parser for the ZIP-XML structure; the same approach generalises to other ministries' tabulations without re-engineering. For richer extraction, ACLED's free-text event notes can be processed by an LLM to flag school-related incidents (attacks, occupations, closures) that don't currently have a structured field — a near-zero-cost augmentation that materially improves signal in the closure dimension.
+**AI-led work**
 
-**AI-assisted name reconciliation.** Mali's administrative names appear with French accents, Bambara transliterations, and OCHA admin codes interchangeably. Automated string matching alone fails for 34 of 50 cercles. A combined approach — phonetic normalisation (NFKD + accent stripping) plus an LLM tie-breaker for ambiguous cases — is the practical path to closing this gap and is the single most impactful change to extend the index's coverage.
+- Generation of the custom XLSX parser for the multi-header school registry (ZIP-XML structure with shared strings)
+- Generation of the ACLED sparse-row forward-fill code for the grouped-layout summary file
+- Authoring of the French/Bambara/admin-code name normalisation logic (NFKD + accent stripping + length-descending substring match)
+- Drafting of the dashboard HTML/CSS scaffold and Chart.js configuration boilerplate
+- Authoring weight-shift sensitivity test scripts (the implementation that produced the 2022–2024 comparison)
+- Initial drafts of proposal and methodology copy, subsequently rewritten by hand
 
-**Monitoring and scalability.** ACLED publishes weekly updates via API. A scheduled job can refresh the conflict-events column, recompute EDI, and post a short LLM-generated summary of week-over-week tier changes ("Cercle X moved from Medium to High; conflict events rose from N to M; field-team verification recommended"). This converts the EDI from a one-off exercise into a living instrument with a recurring information product field offices can subscribe to.
+**Human-led decisions**
 
-**Geospatial and visualisation tooling.** All analytical and visual outputs use open libraries: Python standard library for processing, Leaflet.js for the map, Chart.js for the scatter and bar/donut charts, geoBoundaries for Mali's national boundary. No proprietary licences are required. The dashboard is a single static HTML page hosted on GitHub Pages, viewable on any browser.
+- The 50 / 25 / 25 weighting (closure / events / fatalities)
+- The Critical Tier definition (top 5 with reliable coverage, not a score threshold) — chosen to give a hard-count headline list
+- The Data-Limited gate threshold (events / 100k < 100) and the carve-out for severe conflict
+- Coverage classification thresholds (Full ≥ 10, Partial 3–9, Limited 1–2, Conflict-only 0)
+- Visual prioritisation choices — scatter as centerpiece, what to surface in popups, when to use hollow rings vs solid markers, dashboard layout
+- Sources audit and licence verification (including catching that ACLED is CC BY-NC, not CC BY)
+- The angle and rhetorical framing of the proposal, two-cercle contrast paragraph, and methodology section structure
+
+**Monitoring and scalability.** ACLED publishes weekly updates via API. A scheduled job can refresh the conflict-events and fatalities columns, recompute EDI, and post a short LLM-generated summary of week-over-week tier changes ("Cercle X moved from Medium to High; conflict events rose from N to M; field-team verification recommended"). This converts the EDI from a one-off exercise into a living instrument with a recurring information product field offices can subscribe to.
+
+**Tooling.** All analytical and visual outputs use open libraries: Python standard library for processing, Leaflet.js for the map, Chart.js for the scatter and bar/donut charts, geoBoundaries for Mali's national boundary. No proprietary licences are required. The dashboard is a single static HTML page hosted on GitHub Pages, viewable on any browser.
 
 ---
 
@@ -90,21 +113,36 @@ The project uses AI not as a single feature but as a tool applied at three point
 
 The methodology is built to extend without re-engineering, which is critical for an organisation operating in 12 country contexts with non-uniform data availability.
 
-**Source-agnostic boundary.** The pipeline accepts any conflict-event source providing `(admin2_name, date)` rows, any school registry providing `(admin2_name, status)` rows, and any population source providing `(admin2_name, count)` rows. Mali demonstrates the approach on three OCHA/HDX-resident open datasets; a Yemen or DRC instantiation would swap inputs but reuse the entire processing chain.
+**Source-agnostic boundary.** The pipeline accepts any conflict-event source providing `(admin2_name, date, fatalities)` rows, any school registry providing `(admin2_name, status)` rows, and any population source providing `(admin2_name, count)` rows. Mali demonstrates the approach on three OCHA/HDX-resident open datasets; a Yemen or DRC instantiation would swap inputs but reuse the entire processing chain.
 
-**Data-coverage flagging as the portability mechanism.** The harder-to-port assumption isn't the data sources — it's that data quality varies. A country with strong school records and a sparse conflict reporting environment, or vice versa, will produce a different mix of tiers but the same actionable structure: `High` (act on multi-signal), `Data-Limited` (verify with field teams), `Conflict-only` watch (signal severe enough to act on a single dimension). This means the same output template serves wildly different country contexts without bespoke methodology per country.
+**Data-coverage flagging as the portability mechanism.** The harder-to-port assumption isn't the data sources — it's that data quality varies. A country with strong school records and a sparse conflict reporting environment (or vice versa) will produce a different mix of tiers but the same actionable structure: Critical (act on multi-signal with reliable data), High / Medium / Low (graded by EDI with reliable coverage), Data-Limited (verify with field teams), Conflict-only watch (signal severe enough to act on a single dimension). The same output template serves wildly different country contexts without bespoke methodology per country.
 
-**Scaling to changing conflict dynamics.** Because the index is recomputed from raw inputs each run, escalation in any cercle automatically moves it up the rankings — there is no static tier list to maintain. New cercles or admin-boundary changes are absorbed by updating one CSV.
+**Scaling to changing conflict dynamics.** Because the index is recomputed from raw inputs each run, escalation in any cercle automatically moves it up the rankings — there is no static tier list to maintain. The sensitivity check (2020–2024 vs 2022–2024) demonstrates that the four-cercle core of Mali's Critical Tier (Ménaka, Tombouctou, Bourem, Bankass) is stable across time windows; the fifth slot is sensitive to the window choice — useful intelligence for field teams, not a methodology weakness.
 
 ---
 
 ## 4. Results Summary
 
-Applied to Mali (2020–2024 ACLED window):
+Applied to Mali (2020–2024 ACLED window), the EDI surfaces a clear five-cercle act-now shortlist:
 
-- **20 cercles ranked High** — all with Full or Partial school-data coverage. Tombouctou, Ménaka, Bourem, Bankass, and Diré lead. These are the "act now" shortlist where multiple signals fire and the assessment is well-supported.
-- **22 cercles flagged Data-Limited** — including Bafoulabé and Kayes, which a closure-only ranking would have falsely placed in the top 10 on N=2 and N=1 closures respectively. Mopti town is also here, despite 336 conflict events, because only 2 schools matched. These are the "verify with field teams" shortlist.
-- **4 cercles Medium, 4 Low** — backed by reliable coverage; lower priority for new resourcing.
-- **The conflict-only signal alone identifies Abeibara (1,072 events / 100k), Tessalit (564), Kidal (441), and Niono (113) as needing attention** — four cercles with zero school-registry matches and severe ACLED activity, where field-team knowledge is the only available evidence on education status. The dashboard's scatter chart surfaces these as hollow rings on the right edge of the conflict axis, separating them visually from cercles where the closure signal is also driving the assessment.
+**Critical Tier — the 5 cercles requiring immediate assessment:**
 
-The two shortlists barely overlap. A closure-only triage would have surfaced Bafoulabé, Kayes, and Banamba (all small-N, all currently flagged Data-Limited). A conflict-only triage would have surfaced Abeibara, Tessalit, Kidal, and Niono (all Conflict-only, all invisible in the schools data). Only the composite EDI surfaces both lists distinctly and tells EBI which signal is driving each cercle's tier — which is what makes it a complement to field expertise rather than a substitute for it.
+| Rank | Cercle | Region | EDI | Closure | Events / 100k | Fatalities / 100k | Coverage |
+|---|---|---|---|---|---|---|---|
+| 1 | **Ménaka** | Gao | 0.557 | 80% | 430.6 | 1,548.0 | Full |
+| 2 | **Tombouctou** | Tombouctou | 0.532 | 100% | 118.5 | 129.4 | Full |
+| 3 | **Bourem** | Gao | 0.522 | 100% | 62.1 | 206.4 | Partial |
+| 4 | **Bankass** | Mopti | 0.519 | 96.7% | 95.9 | 358.5 | Full |
+| 5 | **Ansongo** | Gao | 0.516 | 80% | 312.4 | 1,171.3 | Partial |
+
+These are the only cercles where the index has both reliable school-data coverage *and* a top-five EDI score. Three of the five are in Gao region, suggesting regional concentration of the highest-confidence risk signal that EBI can defend to a programme officer without further caveat.
+
+**Tombouctou vs Abeibara — two kinds of risk that a single-source ranking would conflate.** The composite reveals two distinct profiles. **Tombouctou** (Critical Tier #2) sits in the upper-right of the bubble chart with a closure-driven EDI: 11 of 11 matched schools closed, 186 conflict events over 5 years, 203 fatalities, full school-data coverage backing the assessment. **Abeibara**, by contrast, is a hollow ring on the right edge — zero schools registered in the OCHA file, but **1,072 ACLED events per 100,000 people** (the highest rate in Mali) and 868 fatalities. Tombouctou ranks Critical because both signals fire and the data is reliable; Abeibara ranks High purely on conflict severity, and only because the methodology preserves its score when coverage is weak but the conflict signal is overwhelming. The two cercles need different responses (infrastructure rehabilitation in Tombouctou; safety-driven access intervention in Abeibara) and different verification (data-confirmed vs. field-team confirmed). Only the composite EDI with explicit coverage flagging surfaces both as urgent while flagging the difference between them.
+
+**Tier breakdown:** 5 Critical · 14 High · 4 Medium · 5 Low · 22 Data-Limited.
+
+**Conflict-only watch list (no school-registry match, severe ACLED):** Abeibara (1,072 events / 100k), Tessalit (564), Kidal (441), and Niono (113). Together these four cercles cover ~520,000 people for whom the closure axis tells us nothing and field-team knowledge is the only available evidence.
+
+**Two shortlists, barely overlapping.** A closure-only triage would have surfaced Bafoulabé, Kayes, and Banamba (all small-N, all currently flagged Data-Limited and excluded from the Critical Tier). A conflict-only triage would have surfaced Abeibara, Tessalit, Kidal, and Niono (all Conflict-only, all invisible in the schools data). Only the composite EDI with the data-coverage gate produces a defensible Critical Tier *and* a Conflict-only watch list distinctly — which is what makes it a complement to field expertise rather than a substitute for it.
+
+**Sensitivity check.** Re-running the full pipeline restricted to 2022–2024 produces a Critical Tier with 4 of 5 cercles unchanged (Ménaka, Tombouctou, Bourem, Bankass). The fifth slot swaps Ansongo (out) for Diré (in), reflecting that Ansongo's 2020–2021 conflict load exits the window. The four-cercle core is the highest-confidence triage list across both windows. See [METHODOLOGY.md §6](METHODOLOGY.md) for the comparison table.

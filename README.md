@@ -26,11 +26,11 @@ The goal of this project is to support **evidence-based prioritization of educat
 
 The Education Disruption Index combines three openly available datasets:
 
-* **Conflict events** — ACLED (2020–2024) via HDX
+* **Conflict events + fatalities** — ACLED (2020–2024) via HDX
 * **School status** — OCHA Mali school registry via HDX
 * **Population** — OCHA admin-2 estimates via HDX
 
-These inputs are joined at the cercle level (Mali's admin-2 unit) to produce a **composite risk score** weighted 60% closures / 40% conflict-per-100k, plus an explicit **`data_coverage`** flag (`Full` / `Partial` / `Limited` / `Conflict-only`) so users see what evidence supports each cercle's assessment. Cercles with weak school coverage and modest conflict are routed to a **`Data-Limited`** tier instead of being mixed into the risk rankings on small-N noise.
+These inputs are joined at the cercle level (Mali's admin-2 unit) to produce a **composite risk score** weighted **50% closures · 25% events / 100k · 25% fatalities / 100k**, plus an explicit **`data_coverage`** flag (`Full` / `Partial` / `Limited` / `Conflict-only`) so users see what evidence supports each cercle's assessment. A **`Data-Limited`** tier prevents small-N closure inflation, and a **Critical Tier** (top 5 cercles with reliable coverage) gives a defensible headline list. Full technical detail in [METHODOLOGY.md](METHODOLOGY.md).
 
 ---
 
@@ -38,8 +38,8 @@ These inputs are joined at the cercle level (Mali's admin-2 unit) to produce a *
 
 The visual artifact is a two-page interactive dashboard:
 
-* **[Map](index.html)** — one marker per cercle, sized by EDI, coloured by tier; cercles with no school-data coverage are rendered with dashed outlines
-* **[Dashboard](dashboard.html)** — risk distribution, top-10 EDI cercles (Data-Limited excluded), and a **scatter chart** (conflict events per 100k vs % schools closed, by region) that visually separates cercles flagged by both signals from those flagged by only one
+* **[Dashboard](dashboard.html)** — bubble scatter (centerpiece), donut, top-10 bar with Critical Tier highlighted in red, regional bar, "Mali at a Glance" callout, methodology note
+* **[Map](index.html)** — one marker per cercle, sized by EDI, coloured by tier; popup shows coverage, schools matched, closure rate, conflict count, fatalities
 
 🔗 *View the visual artifact:* [https://megphapha.github.io/EduDisruption-Index/](https://megphapha.github.io/EduDisruption-Index/)
 
@@ -63,10 +63,12 @@ This project is a **proof-of-concept** designed for analytical clarity and adapt
 
 ## 📁 Repository Contents
 
-* `/data` – cleaned and processed datasets used in the analysis
-* `/notebooks` or `/scripts` – code used to generate the index
-* `/outputs` – maps and visualizations
-* GitHub Pages site – published visual artifact
+* [PROPOSAL.md](PROPOSAL.md) – strategy section: context, objectives, approach, activities, deliverables, results
+* [METHODOLOGY.md](METHODOLOGY.md) – technical reference: data sources, cleaning, EDI formula, tier rules, sensitivity check
+* `/data/raw` – source files (ACLED, OCHA schools, OCHA population) with [SOURCES.md](data/raw/SOURCES.md)
+* `/data/clean` – processed CSVs including `mali_disruption_summary.csv` and the 2022–2024 sensitivity comparison
+* `/scripts` – `02_build_index.py` (pipeline) and `03_generate_map.py` (visualisation)
+* [index.html](index.html), [dashboard.html](dashboard.html) – static HTML deployed via GitHub Pages
 
 ---
 

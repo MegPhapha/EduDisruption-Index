@@ -11,7 +11,7 @@ def load_data():
     with open('data/clean/mali_map_data.csv', mode='r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            for key in ['lat', 'lng', 'edi', 'total_schools', 'closed_schools', 'pct_closed', 'total_conflict_events', 'events_per_100k', 'population']:
+            for key in ['lat', 'lng', 'edi', 'total_schools', 'closed_schools', 'pct_closed', 'total_conflict_events', 'events_per_100k', 'fatalities', 'fatalities_per_100k', 'population']:
                 row[key] = float(row[key])
             data.append(row)
             regions_events[row['region']] += int(row['total_conflict_events'])
@@ -35,6 +35,7 @@ def get_markers_js(data, colors):
                     <tr><td><b>Schools matched:</b></td><td align='right'>{int(r['total_schools'])}</td></tr>
                     <tr><td><b>Closed schools:</b></td><td align='right'>{int(r['closed_schools'])} ({r['pct_closed']}%)</td></tr>
                     <tr><td><b>Conflict events:</b></td><td align='right'>{int(r['total_conflict_events'])} ({r['events_per_100k']}/100k)</td></tr>
+                    <tr><td><b>Fatalities:</b></td><td align='right'>{int(r['fatalities'])} ({r['fatalities_per_100k']}/100k)</td></tr>
                 </table>
             </div>
         """
@@ -106,6 +107,7 @@ def generate():
     tier_palette = [colors[t] for t in tier_order]
     n_data_limited = tier_counts.get('Data-Limited', 0)
     n_high = tier_counts.get('High', 0)
+    n_critical = tier_counts.get('Critical', 0)
     n_total = sum(tier_counts.values())
 
     # Stats for the "Mali at a Glance" callout card
@@ -113,6 +115,8 @@ def generate():
     top_edi = top_10[0]['edi'] if top_10 else 0
     top_region = max(regions_events, key=regions_events.get) if regions_events else '—'
     top_region_events = regions_events[top_region] if regions_events else 0
+    # Per-cercle bar colour: Critical bars in dark red, others navy.
+    top_10_colors = ['#b30000' if c['risk'] == 'Critical' else '#1a2a3a' for c in top_10]
 
     # 1. INDEX.HTML — main map
     index_html = f"""<!DOCTYPE html>
@@ -227,9 +231,9 @@ def generate():
         <div class="card">
             <h3>Mali at a Glance</h3>
             <div class="stats-grid">
-                <div class="stat">
-                    <div class="stat-num">{n_high}</div>
-                    <div class="stat-label">High-risk cercles<span class="sublabel">act-now list</span></div>
+                <div class="stat" style="border-left-color:#b30000;">
+                    <div class="stat-num">{n_critical}</div>
+                    <div class="stat-label">Critical cercles<span class="sublabel">immediate assessment</span></div>
                 </div>
                 <div class="stat">
                     <div class="stat-num">{n_data_limited}</div>
@@ -247,9 +251,9 @@ def generate():
         </div>
         <div class="card">
             <h3>Methodology Note</h3>
-            <p class="note"><span class="stat">{n_data_limited} of {n_total}</span> cercles are flagged <b>Data-Limited</b> — school-data coverage is insufficient to assess closure rate, so triage relies on the conflict signal and field-team verification. Excluded from Top 10 to keep the headline list defensible.</p>
-            <p class="note" style="margin-top:8px;">EDI weights: <b>60%</b> matched-school closure rate; <b>40%</b> ACLED events / 100k (2020–2024).</p>
-            <p class="note" style="margin-top:8px;"><b>Sources:</b> ACLED, OCHA Mali school registry, OCHA admin-2 population — all via HDX. Spatial view on the <a href="index.html" style="color:var(--navy); font-weight:600;">map page</a>.</p>
+            <p class="note"><b style="color:#b30000;">Critical Tier</b> = top 5 cercles with reliable school-data coverage. <span class="stat">{n_data_limited} of {n_total}</span> cercles are flagged <b>Data-Limited</b> — coverage too thin to trust the closure signal; triage falls to field-team verification.</p>
+            <p class="note" style="margin-top:8px;">EDI weights: <b>50%</b> closure rate · <b>25%</b> ACLED events / 100k · <b>25%</b> fatalities / 100k (2020–2024). Each input normalised to dataset max.</p>
+            <p class="note" style="margin-top:8px;"><b>Sources:</b> ACLED, OCHA Mali school registry, OCHA admin-2 population — via HDX. See <a href="https://github.com/MegPhapha/EduDisruption-Index/blob/main/METHODOLOGY.md" style="color:var(--navy); font-weight:600;">METHODOLOGY.md</a> for full detail. Spatial view on the <a href="index.html" style="color:var(--navy); font-weight:600;">map page</a>.</p>
         </div>
     </div>
     <script>
@@ -268,13 +272,13 @@ def generate():
 
         new Chart(document.getElementById('bar'), {{
             type: 'bar',
-            data: {{ labels: {json.dumps([x['cercle'] for x in top_10])}, datasets: [{{ label: 'EDI', data: {json.dumps([x['edi'] for x in top_10])}, backgroundColor: '#1a2a3a', borderRadius: 3 }}] }},
+            data: {{ labels: {json.dumps([x['cercle'] for x in top_10])}, datasets: [{{ label: 'EDI', data: {json.dumps([x['edi'] for x in top_10])}, backgroundColor: {json.dumps(top_10_colors)}, borderRadius: 3 }}] }},
             options: {{
                 indexAxis: 'y',
                 maintainAspectRatio: false,
                 plugins: {{ legend: {{ display: false }} }},
                 scales: {{
-                    x: {{ beginAtZero: true, max: 0.8, grid: {{ color: '#edf2f7' }} }},
+                    x: {{ beginAtZero: true, max: 0.7, grid: {{ color: '#edf2f7' }} }},
                     y: {{ grid: {{ display: false }}, ticks: {{ font: {{ size: 11 }} }} }}
                 }}
             }}

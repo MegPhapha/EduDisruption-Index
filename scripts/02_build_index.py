@@ -44,6 +44,13 @@ def get_cell_val(cell, strings, ns):
     if is_node is not None: return is_node.text
     return ""
 
+def classify_coverage(n):
+    if n >= 10: return 'Full'
+    if n >= 3: return 'Partial'
+    if n >= 1: return 'Limited'
+    return 'Conflict-only'
+
+# Schools status doesn't depend on the conflict-events year window, so process once.
 print("Processing Schools...")
 schools_stats = {c: {'total': 0, 'closed': 0} for c in official_cercles_norm}
 with zipfile.ZipFile('data/raw/mali_schools_2023.xlsx', 'r') as zip_ref:
@@ -69,83 +76,122 @@ with zipfile.ZipFile('data/raw/mali_schools_2023.xlsx', 'r') as zip_ref:
             schools_stats[cercle]['total'] += 1
             if is_closed: schools_stats[cercle]['closed'] += 1
 
-print("Processing ACLED...")
-conflict_stats = {c: {'events': 0, 'fatalities': 0} for c in official_cercles_norm}
-with zipfile.ZipFile('data/raw/acled_mali_summary.xlsx', 'r') as zip_ref:
-    with zip_ref.open('xl/worksheets/sheet2.xml') as f:
-        tree = ET.parse(f)
-        ns = {'main': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
-        cur_c, cur_y = None, None
-        for row in tree.findall('.//main:row', ns):
-            if int(row.get('r')) < 2: continue
-            row_data = {c.get('r').rstrip('0123456789'): get_cell_val(c, [], ns) for c in row.findall('main:c', ns)}
-            if row_data.get('C'):
-                nv = normalize(row_data['C'])
-                for c in official_cercles_norm:
-                    if c in nv:
-                        cur_c = c
-                        break
-            if row_data.get('H'): cur_y = row_data['H']
-            if cur_c and cur_y and cur_y.isdigit() and 2020 <= int(cur_y) <= 2024:
-                try:
-                    conflict_stats[cur_c]['events'] += int(float(row_data.get('I', 0) or 0))
-                    conflict_stats[cur_c]['fatalities'] += int(float(row_data.get('J', 0) or 0))
-                except: pass
 
-# Finalize
-def classify_coverage(n):
-    if n >= 10: return 'Full'
-    if n >= 3: return 'Partial'
-    if n >= 1: return 'Limited'
-    return 'Conflict-only'
+def aggregate_acled(year_start, year_end):
+    stats = {c: {'events': 0, 'fatalities': 0} for c in official_cercles_norm}
+    with zipfile.ZipFile('data/raw/acled_mali_summary.xlsx', 'r') as zip_ref:
+        with zip_ref.open('xl/worksheets/sheet2.xml') as f:
+            tree = ET.parse(f)
+            ns = {'main': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
+            cur_c, cur_y = None, None
+            for row in tree.findall('.//main:row', ns):
+                if int(row.get('r')) < 2: continue
+                row_data = {c.get('r').rstrip('0123456789'): get_cell_val(c, [], ns) for c in row.findall('main:c', ns)}
+                if row_data.get('C'):
+                    nv = normalize(row_data['C'])
+                    for c in official_cercles_norm:
+                        if c in nv:
+                            cur_c = c
+                            break
+                if row_data.get('H'): cur_y = row_data['H']
+                if cur_c and cur_y and cur_y.isdigit() and year_start <= int(cur_y) <= year_end:
+                    try:
+                        stats[cur_c]['events'] += int(float(row_data.get('I', 0) or 0))
+                        stats[cur_c]['fatalities'] += int(float(row_data.get('J', 0) or 0))
+                    except: pass
+    return stats
 
-final = []
-for k, p in pop_lookup.items():
-    s, c = schools_stats[k], conflict_stats[k]
-    p_cl = (s['closed']/s['total']*100) if s['total']>0 else 0
-    e_100k = (c['events']/p['pop']*100000) if p['pop']>0 else 0
-    l, ln = CAPITAL_COORDS.get(k, (0,0))
-    final.append({
-        'cercle': p['display_name'], 'region': p['region'],
-        'lat': l, 'lng': ln,
-        'total_schools': s['total'], 'closed_schools': s['closed'],
-        'pct_closed': round(p_cl, 2),
-        'total_conflict_events': c['events'], 'population': p['pop'],
-        'events_per_100k': round(e_100k, 2),
-        'data_coverage': classify_coverage(s['total'])
-    })
 
-m_pc = max([r['pct_closed'] for r in final]) if final else 1
-m_ev = max([r['events_per_100k'] for r in final]) if final else 1
+def build_edi(year_start=2020, year_end=2024, suffix=''):
+    print(f"Building EDI for {year_start}-{year_end}{' (sensitivity)' if suffix else ''}...")
+    conflict_stats = aggregate_acled(year_start, year_end)
 
-for r in final:
-    edi = round(((r['pct_closed']/m_pc if m_pc else 0)*0.6) + ((r['events_per_100k']/m_ev if m_ev else 0)*0.4), 3)
-    r['EDI_score'] = edi
-    # Cercles with weak school coverage AND low conflict are flagged Data-Limited rather than mixed into the risk tiers.
-    # Conflict-only cercles with strong conflict signal (>=100 events/100k) keep their conflict-driven tier — the signal is real even without school data.
-    if r['data_coverage'] in ('Limited', 'Conflict-only') and r['events_per_100k'] < 100:
-        r['risk_tier'] = 'Data-Limited'
-    else:
-        r['risk_tier'] = ("Critical" if edi>=0.7 else "High" if edi>=0.4 else "Medium" if edi>=0.2 else "Low")
-
-final.sort(key=lambda x: x['EDI_score'], reverse=True)
-
-# Save
-os.makedirs('data/clean', exist_ok=True)
-with open('data/clean/mali_disruption_summary.csv', 'w', newline='', encoding='utf-8') as f:
-    dw = csv.DictWriter(f, fieldnames=['cercle','region','total_schools','closed_schools','pct_closed','total_conflict_events','population','events_per_100k','EDI_score','risk_tier','data_coverage'])
-    dw.writeheader()
-    for r in final: dw.writerow({k:v for k,v in r.items() if k not in ['lat','lng']})
-
-with open('data/clean/mali_map_data.csv', 'w', newline='', encoding='utf-8') as f:
-    dw = csv.DictWriter(f, fieldnames=['cercle','region','lat','lng','edi','risk','coverage','total_schools','closed_schools','pct_closed','total_conflict_events','events_per_100k','population'])
-    dw.writeheader()
-    for r in final:
-        dw.writerow({
-            'cercle':r['cercle'],'region':r['region'],'lat':r['lat'],'lng':r['lng'],
-            'edi':r['EDI_score'],'risk':r['risk_tier'],'coverage':r['data_coverage'],
-            'total_schools':r['total_schools'],
-            'closed_schools':r['closed_schools'],'pct_closed':r['pct_closed'],
-            'total_conflict_events':r['total_conflict_events'],
-            'events_per_100k':r['events_per_100k'],'population':r['population']
+    final = []
+    for k, p in pop_lookup.items():
+        s, c = schools_stats[k], conflict_stats[k]
+        p_cl = (s['closed']/s['total']*100) if s['total']>0 else 0
+        e_100k = (c['events']/p['pop']*100000) if p['pop']>0 else 0
+        f_100k = (c['fatalities']/p['pop']*100000) if p['pop']>0 else 0
+        l, ln = CAPITAL_COORDS.get(k, (0,0))
+        final.append({
+            'cercle': p['display_name'], 'region': p['region'],
+            'lat': l, 'lng': ln,
+            'total_schools': s['total'], 'closed_schools': s['closed'],
+            'pct_closed': round(p_cl, 2),
+            'total_conflict_events': c['events'], 'fatalities': c['fatalities'],
+            'population': p['pop'],
+            'events_per_100k': round(e_100k, 2),
+            'fatalities_per_100k': round(f_100k, 2),
+            'data_coverage': classify_coverage(s['total'])
         })
+
+    m_pc = max([r['pct_closed'] for r in final]) or 1
+    m_ev = max([r['events_per_100k'] for r in final]) or 1
+    m_fat = max([r['fatalities_per_100k'] for r in final]) or 1
+
+    # EDI = 50% closure rate + 25% events/100k + 25% fatalities/100k. Each input normalised to dataset max.
+    for r in final:
+        edi = round(
+            (r['pct_closed']/m_pc) * 0.5
+            + (r['events_per_100k']/m_ev) * 0.25
+            + (r['fatalities_per_100k']/m_fat) * 0.25,
+            3
+        )
+        r['EDI_score'] = edi
+        # Data-Limited gate: weak coverage + modest conflict → flagged Data-Limited rather than mixed into tiers.
+        # Cercles with weak coverage but severe conflict (events/100k ≥ 100) keep their conflict-driven tier.
+        if r['data_coverage'] in ('Limited', 'Conflict-only') and r['events_per_100k'] < 100:
+            r['risk_tier'] = 'Data-Limited'
+        else:
+            r['risk_tier'] = ("High" if edi>=0.4 else "Medium" if edi>=0.2 else "Low")
+
+    final.sort(key=lambda x: x['EDI_score'], reverse=True)
+
+    # Critical tier: top 5 cercles with reliable coverage (Full or Partial). Hard-coded count, not a score threshold.
+    reliable = [r for r in final if r['data_coverage'] in ('Full', 'Partial')]
+    critical_set = {r['cercle'] for r in reliable[:5]}
+    for r in final:
+        if r['cercle'] in critical_set:
+            r['risk_tier'] = 'Critical'
+
+    os.makedirs('data/clean', exist_ok=True)
+    summary_path = f'data/clean/mali_disruption_summary{suffix}.csv'
+    map_path = f'data/clean/mali_map_data{suffix}.csv'
+
+    with open(summary_path, 'w', newline='', encoding='utf-8') as f:
+        dw = csv.DictWriter(f, fieldnames=[
+            'cercle','region','total_schools','closed_schools','pct_closed',
+            'total_conflict_events','fatalities','population',
+            'events_per_100k','fatalities_per_100k','EDI_score','risk_tier','data_coverage'
+        ])
+        dw.writeheader()
+        for r in final:
+            dw.writerow({k:v for k,v in r.items() if k not in ['lat','lng']})
+
+    with open(map_path, 'w', newline='', encoding='utf-8') as f:
+        dw = csv.DictWriter(f, fieldnames=[
+            'cercle','region','lat','lng','edi','risk','coverage',
+            'total_schools','closed_schools','pct_closed',
+            'total_conflict_events','events_per_100k',
+            'fatalities','fatalities_per_100k','population'
+        ])
+        dw.writeheader()
+        for r in final:
+            dw.writerow({
+                'cercle':r['cercle'],'region':r['region'],'lat':r['lat'],'lng':r['lng'],
+                'edi':r['EDI_score'],'risk':r['risk_tier'],'coverage':r['data_coverage'],
+                'total_schools':r['total_schools'],'closed_schools':r['closed_schools'],
+                'pct_closed':r['pct_closed'],'total_conflict_events':r['total_conflict_events'],
+                'events_per_100k':r['events_per_100k'],
+                'fatalities':r['fatalities'],'fatalities_per_100k':r['fatalities_per_100k'],
+                'population':r['population']
+            })
+
+    return final
+
+
+if __name__ == '__main__':
+    # Default window 2020-2024 (used by dashboard)
+    build_edi(2020, 2024, '')
+    # Sensitivity check: recent half (2022-2024)
+    build_edi(2022, 2024, '_2022_2024')
