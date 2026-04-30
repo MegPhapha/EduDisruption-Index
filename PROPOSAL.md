@@ -38,11 +38,22 @@ This project delivers a composite **Education Disruption Index (EDI)** for Mali 
 
 **Tiering with a data-coverage gate.** The EDI score determines a base tier (`Critical ≥ 0.7`, `High ≥ 0.4`, `Medium ≥ 0.2`, `Low < 0.2`). Cercles with weak school coverage (< 3 schools matched) and modest conflict rate (< 100 events / 100k) are routed to a **`Data-Limited`** tier instead. This prevents the small-N closure inflation that would otherwise push cercles like Bafoulabé (2 schools, both closed → "100% closed") into the High tier on noise. Cercles with weak coverage but severe conflict (e.g., Tessalit at 564/100k) keep their conflict-driven tier — because the conflict signal alone is severe enough to act on, with the coverage flag making the limitation visible.
 
-**Visual prioritisation.** The output is a single dashboard with three connected views:
+**Visual prioritisation.** The output is a single dashboard with three connected views and a separate full-screen map:
 
-- An **interactive map** of Mali with one marker per cercle, sized by EDI, coloured by tier, and **dashed for cercles with no school-data coverage** so a glance at the map reveals not just where risk is high but where the assessment rests on a single signal.
-- A **scatter chart** plotting conflict-events-per-100k against school-closure rate, with each cercle as a bubble (size ∝ √population, colour by region, hollow ring for data-gap cercles). This is the visual that supports the central argument: cercles in the upper-right are flagged by both signals; cercles isolated on one axis tell EBI which signal is driving their tier and where field verification is most needed.
-- A **top-10 ranked list** that explicitly excludes Data-Limited cercles, so the headline shortlist is defensible.
+- A **bubble scatter** (centerpiece of the dashboard) plotting conflict events per 100k against school-closure rate, with each cercle as one bubble. Size scales with √population, colour marks the region, and **hollow rings** flag cercles where school-data coverage is too thin for the closure signal to be trusted. Reading guide below.
+- A **donut, top-10 bar, and regional bar** alongside the scatter, plus a "Mali at a Glance" callout summarising the headline numbers (20 High-risk cercles, 22 Data-Limited, top cercle, top region).
+- A separate **full-screen interactive map** with one marker per cercle, sized by EDI and coloured by tier (grey markers = Data-Limited cercles where the assessment rests on the conflict signal alone). Hovering or clicking a cercle surfaces its coverage classification, schools matched, closure rate, and conflict count.
+
+**Reading the bubble chart.** The scatter is built so that each cercle's *position* on the chart names its risk profile. Walk it through four corners:
+
+- **Upper-right (filled bubbles).** Both signals fire — conflict severe *and* closures widespread. The act-now shortlist: Tombouctou, Bankass, Ménaka, Ansongo, Djenné.
+- **Upper-left (filled).** Closures without much conflict — where displacement, teacher absence, or supply-chain failure shows up first. In Mali these are mostly small-N artifacts and route to Data-Limited; in another country with reliable school records this corner would be substantively populated.
+- **Right edge (hollow rings).** Severe conflict, no school-registry match — Abeibara (1,072 events / 100k), Tessalit (564), Kidal (441), Niono (113). The conflict-only watch list, where field-team knowledge is the only available evidence on education status.
+- **Lower-left.** Low on both signals. No urgent action.
+
+If conflict and closures tracked the same cercles, the bubbles would form a diagonal from lower-left to upper-right. They form an **L-shape** instead — filled bubbles climbing through the middle, hollow rings stretching along the right edge. That gap is the methodology argument made visually: a single-source ranking would surface the wrong cercles, but the composite EDI with explicit coverage flags surfaces both shortlists distinctly and tells field staff which signal is driving each cercle's tier.
+
+A **top-10 ranked list** sits beside the scatter and explicitly excludes Data-Limited cercles, so the headline shortlist EBI staff would screenshot is defensible without further caveat.
 
 ### Activities
 
