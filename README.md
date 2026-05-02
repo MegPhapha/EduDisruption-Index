@@ -8,7 +8,7 @@ A data-driven Education Disruption Index for Mali that combines conflict events,
 
 ## Overview
 
-Education systems in conflict-affected regions face continuous disruption—not only from direct violence, but from displacement, infrastructure damage, and reduced accessibility to schools. In Mali, these challenges are unevenly distributed across regions, making it difficult to identify where interventions are most urgently needed.
+Education systems in conflict-affected regions face continuous disruption not only from direct violence, but from displacement, infrastructure damage, and reduced accessibility to schools. In Mali, these challenges are unevenly distributed across regions, making it difficult to identify where interventions are most urgently needed.
 
 This project develops a **data-driven Education Disruption Index (EDI)** to identify areas where access to education is most at risk. The index integrates multiple indicators including conflict intensity, population distribution, and proximity to schools to provide a clearer, system-level view of education vulnerability.
 
