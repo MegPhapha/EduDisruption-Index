@@ -12,15 +12,15 @@
 
 ### Context
 
-Education systems in Mali face compounding pressure from a decade of armed conflict, mass displacement, and degraded service delivery. EBI's planning teams already know the most visible crises through their field network — but no single open dataset answers the question they need to answer next: *across the country, where is education most at risk, and where is the data we have on that risk reliable enough to act on?*
+Education systems in Mali face compounding pressure from a decade of armed conflict, mass displacement, and degraded service delivery. EBI's planning teams already know the most visible crises through their field network but no single open dataset answers the question they need to answer next: *across the country, where is education most at risk, and where is the data we have on that risk reliable enough to act on?*
 
 A first-pass review of the open data landscape for Mali surfaces the core problem this proposal addresses:
 
-- **ACLED** records every conflict event but says nothing about whether schools are open. Some of the country's highest event rates per capita are in cercles where, on its own, ACLED looks like a sufficient signal — Abeibara, Tessalit, Kidal — but field teams know that "high conflict rate" in a near-empty cercle is a different decision problem than "high conflict rate" in a populated one.
-- **OCHA's school registry** records facility status but covers cercles unevenly. Of Mali's 50 cercles, automated joining produces full coverage for 14, partial for 9, and weak or no coverage for 27. A closure-rate ranking built on this data alone would falsely place Bafoulabé and Kayes in the top 10 (N=2 and N=1 schools matched, both 100% closed), while Niono — with 510 conflict events — would appear to have no closures because no schools matched at all.
-- **OCHA admin-2 population** estimates are reliable but only useful in combination with the other two — population without a hazard signal is just demography.
+- **ACLED** records every conflict event but says nothing about whether schools are open. Some of the country's highest event rates per capita are in cercles where, on its own, ACLED looks like a sufficient signal. Abeibara, Tessalit, Kidal but field teams know that "high conflict rate" in a near-empty cercle is a different decision problem than "high conflict rate" in a populated one.
+- **OCHA's school registry** records facility status but covers cercles unevenly. Of Mali's 50 cercles, automated joining produces full coverage for 14, partial for 9, and weak or no coverage for 27. A closure-rate ranking built on this data alone would falsely place Bafoulabé and Kayes in the top 10 (N=2 and N=1 schools matched, both 100% closed), while Niono with 510 conflict events would appear to have no closures because no schools matched at all.
+- **OCHA admin-2 population** estimates are reliable but only useful in combination with the other two  population without a hazard signal is just demography.
 
-The conclusion EBI's preliminary mapping exercise reached — that open data plus the right analytical tooling could meaningfully strengthen prioritisation — is correct. But it depends on a piece of analytical discipline that single-source maps don't provide: **knowing which cercles have enough data behind their assessment, and which are flagged on a partial signal that field teams are the only ones positioned to verify.**
+The conclusion EBI's preliminary mapping exercise reached is that open data plus the right analytical tooling could meaningfully strengthen prioritisation is correct. But it depends on a piece of analytical discipline that single-source maps don't provide: **knowing which cercles have enough data behind their assessment, and which are flagged on a partial signal that field teams are the only ones positioned to verify.**
 
 ### Objectives
 
@@ -37,7 +37,7 @@ This project delivers a composite **Education Disruption Index (EDI)** for Mali 
 
 **Composite scoring.** EDI = 0.5 × closure-rate + 0.25 × events / 100k + 0.25 × fatalities / 100k. Each input normalised to its dataset maximum so EDI ∈ [0, 1]. Closure rate carries the highest weight because it is the most direct measure of education disruption rather than a precondition. Events and fatalities together carry the same weight (50/50): events capture *frequency* of insecurity, fatalities capture *severity*. Including both prevents the index from being driven by event count alone, where a single high-casualty attack would otherwise weigh the same as a brief skirmish.
 
-**Tiering with a data-coverage gate.** Cercles with weak school coverage (< 3 schools matched) AND modest conflict rate (< 100 events / 100k) are routed to a **`Data-Limited`** tier instead of being scored against the main thresholds. This prevents small-N closure inflation. Cercles with weak coverage but severe conflict (e.g., Tessalit at 564 events / 100k) keep their conflict-driven tier — the signal alone is severe enough to act on, with the coverage flag making the limitation visible.
+**Tiering with a data-coverage gate.** Cercles with weak school coverage (< 3 schools matched) AND modest conflict rate (< 100 events / 100k) are routed to a **`Data-Limited`** tier instead of being scored against the main thresholds. This prevents small-N closure inflation. Cercles with weak coverage but severe conflict (e.g., Tessalit at 564 events / 100k) keep their conflict-driven tier the signal alone is severe enough to act on, with the coverage flag making the limitation visible.
 
 **Critical Tier.** After tiering, the top 5 cercles by EDI with `coverage in ('Full', 'Partial')` are reassigned to Critical. Hard-coded count, not a score threshold; gives a defensible 5-cercle headline list regardless of where score boundaries fall.
 
@@ -96,7 +96,7 @@ The project uses AI as a code-and-prose accelerator with all analytical decision
 **Human-led decisions**
 
 - The 50 / 25 / 25 weighting (closure / events / fatalities)
-- The Critical Tier definition (top 5 with reliable coverage, not a score threshold) — chosen to give a hard-count headline list
+- The Critical Tier definition (top 5 with reliable coverage, not a score threshold) chosen to give a hard-count headline list
 - The Data-Limited gate threshold (events / 100k < 100) and the carve-out for severe conflict
 - Coverage classification thresholds (Full ≥ 10, Partial 3–9, Limited 1–2, Conflict-only 0)
 - Visual prioritisation choices — scatter as centerpiece, what to surface in popups, when to use hollow rings vs solid markers, dashboard layout
@@ -115,9 +115,9 @@ The methodology is built to extend without re-engineering, which is critical for
 
 **Source-agnostic boundary.** The pipeline accepts any conflict-event source providing `(admin2_name, date, fatalities)` rows, any school registry providing `(admin2_name, status)` rows, and any population source providing `(admin2_name, count)` rows. Mali demonstrates the approach on three OCHA/HDX-resident open datasets; a Yemen or DRC instantiation would swap inputs but reuse the entire processing chain.
 
-**Data-coverage flagging as the portability mechanism.** The harder-to-port assumption isn't the data sources — it's that data quality varies. A country with strong school records and a sparse conflict reporting environment (or vice versa) will produce a different mix of tiers but the same actionable structure: Critical (act on multi-signal with reliable data), High / Medium / Low (graded by EDI with reliable coverage), Data-Limited (verify with field teams), Conflict-only watch (signal severe enough to act on a single dimension). The same output template serves wildly different country contexts without bespoke methodology per country.
+**Data-coverage flagging as the portability mechanism.** The harder-to-port assumption isn't the data sources, it's that data quality varies. A country with strong school records and a sparse conflict reporting environment (or vice versa) will produce a different mix of tiers but the same actionable structure: Critical (act on multi-signal with reliable data), High / Medium / Low (graded by EDI with reliable coverage), Data-Limited (verify with field teams), Conflict-only watch (signal severe enough to act on a single dimension). The same output template serves wildly different country contexts without bespoke methodology per country.
 
-**Scaling to changing conflict dynamics.** Because the index is recomputed from raw inputs each run, escalation in any cercle automatically moves it up the rankings — there is no static tier list to maintain. The sensitivity check (2020–2024 vs 2022–2024) demonstrates that the four-cercle core of Mali's Critical Tier (Ménaka, Tombouctou, Bourem, Bankass) is stable across time windows; the fifth slot is sensitive to the window choice — useful intelligence for field teams, not a methodology weakness.
+**Scaling to changing conflict dynamics.** Because the index is recomputed from raw inputs each run, escalation in any cercle automatically moves it up the rankings. There is no static tier list to maintain. The sensitivity check (2020–2024 vs 2022–2024) demonstrates that the four-cercle core of Mali's Critical Tier (Ménaka, Tombouctou, Bourem, Bankass) is stable across time windows; the fifth slot is sensitive to the window choice — useful intelligence for field teams, not a methodology weakness.
 
 ---
 
