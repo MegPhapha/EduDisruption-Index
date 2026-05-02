@@ -2,7 +2,7 @@
 
 **Prepared for:** Education Bridge Initiative (EBI)
 **Date:** April 27, 2026
-**Visual artifact:** https://megphapha.github.io/EduDisruption-Index/
+**Visual artifact:** https://MegPhapha.github.io/EduDisruption-Index/
 **Repository:** https://github.com/MegPhapha/EduDisruption-Index
 **Technical reference:** [METHODOLOGY.md](METHODOLOGY.md)
 
@@ -18,7 +18,7 @@ A first-pass review of the open data landscape for Mali surfaces the core proble
 
 - **ACLED** records every conflict event but says nothing about whether schools are open. Some of the country's highest event rates per capita are in cercles where, on its own, ACLED looks like a sufficient signal — Abeibara, Tessalit, Kidal — but field teams know that "high conflict rate" in a near-empty cercle is a different decision problem than "high conflict rate" in a populated one.
 - **OCHA's school registry** records facility status but covers cercles unevenly. Of Mali's 50 cercles, automated joining produces full coverage for 14, partial for 9, and weak or no coverage for 27. A closure-rate ranking built on this data alone would falsely place Bafoulabé and Kayes in the top 10 (N=2 and N=1 schools matched, both 100% closed), while Niono — with 510 conflict events — would appear to have no closures because no schools matched at all.
-- **WorldPop / OCHA population** estimates are reliable but only useful in combination with the other two — population without a hazard signal is just demography.
+- **OCHA admin-2 population** estimates are reliable but only useful in combination with the other two — population without a hazard signal is just demography.
 
 The conclusion EBI's preliminary mapping exercise reached — that open data plus the right analytical tooling could meaningfully strengthen prioritisation — is correct. But it depends on a piece of analytical discipline that single-source maps don't provide: **knowing which cercles have enough data behind their assessment, and which are flagged on a partial signal that field teams are the only ones positioned to verify.**
 
