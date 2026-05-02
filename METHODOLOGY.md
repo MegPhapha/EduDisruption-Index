@@ -2,7 +2,7 @@
 
 This document complements [PROPOSAL.md](PROPOSAL.md) with the data sources, cleaning decisions, EDI construction, classification rules, sensitivity checks, and limitations behind the analysis. The purpose is transparency and reproducibility: every output referenced in the proposal can be traced back to a defined analytical step, enabling independent validation and reuse.
 
-It is designed for technical reviewers, implementers, and EBI staff seeking to understand, replicate, or adapt the methodology — with this Mali application as the worked example.
+It is intended for technical reviewers, future implementers, and EBI staff who may wish to adapt or extend this methodology to other contexts, including applications beyond Mali.
 
 ## 1. Data sources
 
