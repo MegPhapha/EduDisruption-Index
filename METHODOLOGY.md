@@ -1,6 +1,10 @@
 # Mali EDI — Methodology
 
-This document is the technical companion to [PROPOSAL.md](PROPOSAL.md). It records every data sourcing and cleaning decision, the EDI formula derivation, the tier and coverage classification rules, the sensitivity check, and known limitations. It documents the analytical choices behind every number that appears in the proposal, and is structured so a reviewer can re-run the pipeline and reproduce each figure cited.
+This document complements [PROPOSAL.md](PROPOSAL.md) by detailing the data, methods, and assumptions underpinning the analysis. It outlines all sourcing and cleaning decisions, the construction of the Education Disruption Index (EDI), classification rules, sensitivity checks, and key limitations.
+
+The purpose is to ensure full transparency and reproducibility. Every output referenced in the proposal can be traced back to a defined analytical step, enabling independent validation and reuse.
+
+This document is designed for technical reviewers, implementers, and EBI staff seeking to understand, replicate, or adapt the methodology across different operational contexts, including applications in Mali.
 
 ## 1. Data sources
 
