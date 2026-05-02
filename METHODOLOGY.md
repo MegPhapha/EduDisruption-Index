@@ -4,7 +4,7 @@ This document complements [PROPOSAL.md](PROPOSAL.md) by detailing the data, meth
 
 The purpose is to ensure full transparency and reproducibility. Every output referenced in the proposal can be traced back to a defined analytical step, enabling independent validation and reuse.
 
-This document is designed for technical reviewers, implementers, and EBI staff seeking to understand, replicate, or adapt the methodology across different operational contexts, including applications in Mali.
+This document is designed for technical reviewers, implementers, and EBI staff seeking to understand, replicate, or adapt the methodology across different operational contexts, including applications in Mali and beyond.
 
 ## 1. Data sources
 
