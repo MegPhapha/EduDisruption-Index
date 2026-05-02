@@ -41,11 +41,11 @@ This project delivers a composite **Education Disruption Index (EDI)** for Mali 
 
 **Critical Tier.** After tiering, the top 5 cercles by EDI with `coverage in ('Full', 'Partial')` are reassigned to Critical. Hard-coded count, not a score threshold; gives a defensible 5-cercle headline list regardless of where score boundaries fall.
 
-**Visual prioritisation.** The output is a single dashboard plus a separate full-screen map:
+**Visual prioritisation.** The output is an interactive map (the default landing page) plus an analytics dashboard one click away:
 
+- A **full-screen interactive map** with one marker per cercle, sized by EDI and coloured by tier (grey markers = Data-Limited cercles where the assessment rests on the conflict signal alone). Clicking a cercle surfaces its coverage, schools matched, closure rate, conflict count, and fatality count. This is what loads when a reviewer opens the GitHub Pages URL.
 - A **bubble scatter** (centerpiece of the dashboard) plotting conflict events per 100k against school-closure rate, with each cercle as one bubble. Size scales with √population, colour marks the region, and **hollow rings** flag cercles where school-data coverage is too thin for the closure signal to be trusted.
 - A **donut, top-10 bar (Critical bars in dark red), and regional bar** alongside the scatter, plus a "Mali at a Glance" callout summarising the headline numbers (5 Critical cercles, 22 Data-Limited, top cercle, top region).
-- A separate **full-screen interactive map** with one marker per cercle, sized by EDI and coloured by tier (grey markers = Data-Limited cercles where the assessment rests on the conflict signal alone). Clicking a cercle surfaces its coverage, schools matched, closure rate, conflict count, and fatality count.
 
 **Reading the bubble chart.** The scatter is built so that each cercle's *position* on the chart names its risk profile:
 
@@ -73,8 +73,8 @@ See [METHODOLOGY.md](METHODOLOGY.md) for full technical detail on data cleaning,
 
 1. **Cleaned EDI dataset** (`data/clean/mali_disruption_summary.csv`) — 50 cercles × 13 columns including the `data_coverage` flag, fatalities, and risk tier.
 2. **Sensitivity comparison dataset** (`data/clean/*_2022_2024.csv`) — same schema, restricted to recent half.
-3. **Interactive dashboard** with bubble scatter as the centerpiece, plus donut, top-10 bar (Critical highlighted), regional bar, "Mali at a Glance" callout, and methodology note. Single-screen layout designed to be read by non-technical staff.
-4. **Full-screen interactive map** linked from the dashboard.
+3. **Full-screen interactive map** (the default landing page at the GitHub Pages URL) — one marker per cercle, sized by EDI and coloured by tier; popup shows coverage, schools matched, closure rate, conflict count, and fatalities.
+4. **Interactive analytics dashboard** with bubble scatter as the centerpiece, plus donut, top-10 bar (Critical highlighted), regional bar, "Mali at a Glance" callout, and methodology note. Single-screen layout designed to be read by non-technical staff.
 5. **Reproducible Python pipeline** (`scripts/02_build_index.py`, `scripts/03_generate_map.py`) — using only the standard library and Chart.js / Leaflet via CDN. No proprietary dependencies.
 6. **Technical methodology reference** ([METHODOLOGY.md](METHODOLOGY.md)) — data sourcing, cleaning decisions, formula derivation, tier rules, sensitivity check, and known limitations.
 
