@@ -41,7 +41,7 @@ The visual artifact is a two-page interactive view (the URL opens the map first;
 * **[Map](index.html)** *(default landing page)* — one marker per cercle, sized by EDI, coloured by tier; popup shows coverage, schools matched, closure rate, conflict count, fatalities
 * **[Dashboard](dashboard.html)** — bubble scatter (centerpiece), donut, top-10 bar with Critical Tier highlighted in red, regional bar, "Mali at a Glance" callout, methodology note
 
-🔗 *View the visual artifact:* [https://megphapha.github.io/EduDisruption-Index/](https://megphapha.github.io/EduDisruption-Index/)
+🔗 *View the visual artifact:* [https://MegPhapha.github.io/EduDisruption-Index/](https://MegPhapha.github.io/EduDisruption-Index/)
 
 ---
 
