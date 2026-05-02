@@ -1,6 +1,6 @@
 # Mali EDI — Methodology
 
-This document is the technical companion to [PROPOSAL.md](PROPOSAL.md). It records every data sourcing and cleaning decision, the EDI formula derivation, the tier and coverage classification rules, the sensitivity check, and known limitations. It is intended for technical reviewers, future implementers, and EBI staff who wish to adapt this methodology to other country contexts.
+This document is the technical companion to [PROPOSAL.md](PROPOSAL.md). It records every data sourcing and cleaning decision, the EDI formula derivation, the tier and coverage classification rules, the sensitivity check, and known limitations. Use it to verify the methodology, replicate the pipeline on updated data, or adapt the approach to another country.
 
 ## 1. Data sources
 
