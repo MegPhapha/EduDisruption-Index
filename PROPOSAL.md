@@ -146,3 +146,11 @@ These are the only cercles where the index has both reliable school-data coverag
 **Two shortlists, barely overlapping.** A closure-only triage would have surfaced Bafoulabé, Kayes, and Banamba (all small-N, all currently flagged Data-Limited and excluded from the Critical Tier). A conflict-only triage would have surfaced Abeibara, Tessalit, Kidal, and Niono (all Conflict-only, all invisible in the schools data). Only the composite EDI with the data-coverage gate produces a defensible Critical Tier *and* a Conflict-only watch list distinctly — which is what makes it a complement to field expertise rather than a substitute for it.
 
 **Sensitivity check.** Re-running the full pipeline restricted to 2022–2024 produces a Critical Tier with 4 of 5 cercles unchanged (Ménaka, Tombouctou, Bourem, Bankass). The fifth slot swaps Ansongo (out) for Diré (in), reflecting that Ansongo's 2020–2021 conflict load exits the window. The four-cercle core is the highest-confidence triage list across both windows. See [METHODOLOGY.md §6](METHODOLOGY.md) for the comparison table.
+
+---
+
+**Submitted by:** Margaret Fafa Amanfu
+**Submission date:** May 2026
+**Submitted to:** Corep Club — Crash Course 1 Exam (Education Bridge Initiative RFP)
+**Visual artifact:** [https://MegPhapha.github.io/EduDisruption-Index/](https://MegPhapha.github.io/EduDisruption-Index/)
+**Repository:** [https://github.com/MegPhapha/EduDisruption-Index](https://github.com/MegPhapha/EduDisruption-Index)
