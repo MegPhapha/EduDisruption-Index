@@ -11,3 +11,6 @@ scripts/archive/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Exam materials — kept locally only, not hosted in the public repo
+docs/exams-rfp.md
