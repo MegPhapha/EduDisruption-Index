@@ -35,7 +35,7 @@ This project delivers a composite **Education Disruption Index (EDI)** for Mali 
 
 ### Proposed Approach
 
-**Composite scoring.** EDI = 0.5 × closure-rate + 0.25 × events / 100k + 0.25 × fatalities / 100k. Each input normalised to its dataset maximum so EDI ∈ [0, 1]. Closure rate carries the highest weight because it is the most direct measure of education disruption rather than a precondition. Events and fatalities together carry the same weight (50/50): events capture *frequency* of insecurity, fatalities capture *severity*. Including both prevents the index from being driven by event count alone, where a single high-casualty attack would otherwise weigh the same as a brief skirmish.
+**Composite scoring.** EDI = 0.5 × closure-rate + 0.25 × events / 100k + 0.25 × fatalities / 100k. Each input normalised to its dataset maximum so EDI lands between 0 and 1. Closure rate carries the highest weight because it is the most direct measure of education disruption rather than a precondition. Events and fatalities together carry the same weight (50/50): events capture *frequency* of insecurity, fatalities capture *severity*. Including both prevents the index from being driven by event count alone, where a single high-casualty attack would otherwise weigh the same as a brief skirmish.
 
 **Tiering with a data-coverage gate.** Cercles with weak school coverage (< 3 schools matched) AND modest conflict rate (< 100 events / 100k) are routed to a **`Data-Limited`** tier instead of being scored against the main thresholds. This prevents small-N closure inflation. Cercles with weak coverage but severe conflict (e.g., Tessalit at 564 events / 100k) keep their conflict-driven tier — the signal alone is severe enough to act on, with the coverage flag making the limitation visible.
 
@@ -44,7 +44,7 @@ This project delivers a composite **Education Disruption Index (EDI)** for Mali 
 **Visual prioritisation.** The output is an interactive map (the default landing page) plus an analytics dashboard one click away:
 
 - A **full-screen interactive map** with one marker per cercle, sized by EDI and coloured by tier (grey markers = Data-Limited cercles where the assessment rests on the conflict signal alone). Clicking a cercle surfaces its coverage, schools matched, closure rate, conflict count, and fatality count. This is what loads when a reviewer opens the GitHub Pages URL.
-- A **bubble scatter** (centerpiece of the dashboard) plotting conflict events per 100k against school-closure rate, with each cercle as one bubble. Size scales with √population, colour marks the region, and **hollow rings** flag cercles where school-data coverage is too thin for the closure signal to be trusted.
+- A **bubble scatter** (centerpiece of the dashboard) plotting conflict events per 100k against school-closure rate, with each cercle as one bubble. Size scales with the square root of population, colour marks the region, and **hollow rings** flag cercles where school-data coverage is too thin for the closure signal to be trusted.
 - A **donut, top-10 bar (Critical bars in dark red), and regional bar** alongside the scatter, plus a "Mali at a Glance" callout summarising the headline numbers (5 Critical cercles, 22 Data-Limited, top cercle, top region).
 
 **Reading the bubble chart.** The scatter is built so that each cercle's *position* on the chart names its risk profile:
@@ -62,7 +62,7 @@ See [METHODOLOGY.md](METHODOLOGY.md) for full technical detail on data cleaning,
 
 ### Activities
 
-- **Data integration** — Normalise French-accented administrative names across three sources with mismatched spellings (`Baraouéli` ↔ `baraoueli`; `Niafunké` ↔ `Niafunke`); reconcile cercle codes to a single authoritative list of 50.
+- **Data integration** — Normalise French-accented administrative names across three sources with mismatched spellings (e.g., `Baraouéli` is normalised to `baraoueli`; `Niafunké` to `Niafunke`); reconcile cercle codes to a single authoritative list of 50.
 - **Schools matching** — Parse a non-standard multi-header XLSX from the Ministry of Education; classify each cercle's coverage (Full / Partial / Limited / Conflict-only).
 - **Conflict aggregation** — Sum ACLED events and fatalities per cercle for the 2020–2024 window; normalise per 100k population.
 - **Composite scoring + Critical Tier assignment** — Compute EDI under the 50/25/25 weighting, apply the Data-Limited gate, then reassign the top 5 reliable cercles to Critical.
@@ -98,7 +98,7 @@ The project uses AI as a code-and-prose accelerator with all analytical decision
 - The 50 / 25 / 25 weighting (closure / events / fatalities)
 - The Critical Tier definition (top 5 with reliable coverage, not a score threshold) chosen to give a hard-count headline list
 - The Data-Limited gate threshold (events / 100k < 100) and the carve-out for severe conflict
-- Coverage classification thresholds (Full ≥ 10, Partial 3–9, Limited 1–2, Conflict-only 0)
+- Coverage classification thresholds (Full: 10 or more, Partial: 3 to 9, Limited: 1 to 2, Conflict-only: 0)
 - Visual prioritisation choices — scatter as centerpiece, what to surface in popups, when to use hollow rings vs solid markers, dashboard layout
 - Sources audit and licence verification (including catching that ACLED is CC BY-NC, not CC BY)
 - The angle and rhetorical framing of the proposal, two-cercle contrast paragraph, and methodology section structure
