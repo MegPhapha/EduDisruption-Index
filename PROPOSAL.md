@@ -16,11 +16,11 @@ Education systems in Mali face compounding pressure from a decade of armed confl
 
 A first-pass review of the open data landscape for Mali surfaces the core problem this proposal addresses:
 
-- **ACLED** records every conflict event but says nothing about whether schools are open. Some of the country's highest event rates per capita are in cercles where, on its own, ACLED looks like a sufficient signal. Abeibara, Tessalit, Kidal but field teams know that "high conflict rate" in a near-empty cercle is a different decision problem than "high conflict rate" in a populated one.
+- **ACLED** records every conflict event but says nothing about whether schools are open. Some of the country's highest event rates per capita are in cercles where, on its own, ACLED looks like a sufficient signal — Abeibara, Tessalit, Kidal — but field teams know that "high conflict rate" in a near-empty cercle is a different decision problem than "high conflict rate" in a populated one.
 - **OCHA's school registry** records facility status but covers cercles unevenly. Of Mali's 50 cercles, automated joining produces full coverage for 14, partial for 9, and weak or no coverage for 27. A closure-rate ranking built on this data alone would falsely place Bafoulabé and Kayes in the top 10 (N=2 and N=1 schools matched, both 100% closed), while Niono with 510 conflict events would appear to have no closures because no schools matched at all.
-- **OCHA admin-2 population** estimates are reliable but only useful in combination with the other two  population without a hazard signal is just demography.
+- **OCHA admin-2 population** estimates are reliable but only useful in combination with the other two — population without a hazard signal is just demography.
 
-The conclusion EBI's preliminary mapping exercise reached is that open data plus the right analytical tooling could meaningfully strengthen prioritisation is correct. But it depends on a piece of analytical discipline that single-source maps don't provide: **knowing which cercles have enough data behind their assessment, and which are flagged on a partial signal that field teams are the only ones positioned to verify.**
+The conclusion EBI's preliminary mapping exercise reached — that open data plus the right analytical tooling could meaningfully strengthen prioritisation — is correct. But it depends on a piece of analytical discipline that single-source maps don't provide: **knowing which cercles have enough data behind their assessment, and which are flagged on a partial signal that field teams are the only ones positioned to verify.**
 
 ### Objectives
 
@@ -37,7 +37,7 @@ This project delivers a composite **Education Disruption Index (EDI)** for Mali 
 
 **Composite scoring.** EDI = 0.5 × closure-rate + 0.25 × events / 100k + 0.25 × fatalities / 100k. Each input normalised to its dataset maximum so EDI ∈ [0, 1]. Closure rate carries the highest weight because it is the most direct measure of education disruption rather than a precondition. Events and fatalities together carry the same weight (50/50): events capture *frequency* of insecurity, fatalities capture *severity*. Including both prevents the index from being driven by event count alone, where a single high-casualty attack would otherwise weigh the same as a brief skirmish.
 
-**Tiering with a data-coverage gate.** Cercles with weak school coverage (< 3 schools matched) AND modest conflict rate (< 100 events / 100k) are routed to a **`Data-Limited`** tier instead of being scored against the main thresholds. This prevents small-N closure inflation. Cercles with weak coverage but severe conflict (e.g., Tessalit at 564 events / 100k) keep their conflict-driven tier the signal alone is severe enough to act on, with the coverage flag making the limitation visible.
+**Tiering with a data-coverage gate.** Cercles with weak school coverage (< 3 schools matched) AND modest conflict rate (< 100 events / 100k) are routed to a **`Data-Limited`** tier instead of being scored against the main thresholds. This prevents small-N closure inflation. Cercles with weak coverage but severe conflict (e.g., Tessalit at 564 events / 100k) keep their conflict-driven tier — the signal alone is severe enough to act on, with the coverage flag making the limitation visible.
 
 **Critical Tier.** After tiering, the top 5 cercles by EDI with `coverage in ('Full', 'Partial')` are reassigned to Critical. Hard-coded count, not a score threshold; gives a defensible 5-cercle headline list regardless of where score boundaries fall.
 
