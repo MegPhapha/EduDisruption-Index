@@ -48,3 +48,12 @@ For remaining cercles, EDI is based on conflict
 intensity only. Full school integration would 
 require converting the raw XLSX to a flat CSV 
 with explicit cercle columns.
+
+## 4. Cercle Boundaries (geoBoundaries-MLI-ADM2_simplified.geojson)
+- Source: geoBoundaries gbOpen (boundary source: DNCT, DNP and OCHA Mali; year represented 2017)
+- URL: https://www.geoboundaries.org/api/current/gbOpen/MLI/ADM2/
+- Downloaded: October 2026
+- Features: 50 (one per cercle)
+- Format: GeoJSON (simplified)
+- License: Creative Commons Attribution 4.0 (CC BY 4.0)
+- Used only for drawing the map. Names are unaccented, so `03_generate_map.py` joins them via `utils.normalize`, with one spelling alias (Baraouéli → "Baroueli").

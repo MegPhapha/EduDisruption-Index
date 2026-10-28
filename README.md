@@ -38,7 +38,7 @@ These inputs are joined at the cercle level (Mali's admin-2 unit) to produce a *
 
 The visual artifact is a two-page interactive view (the URL opens the map first; the dashboard is one click away):
 
-* **[Map](index.html)** *(default landing page)* — one marker per cercle, sized by EDI, coloured by tier; popup shows coverage, schools matched, closure rate, conflict count, fatalities. A collapsible story panel adds headline stats with sources, named priority clusters covering all Critical cercles, a plain-language "how to read this map" note, and links to the evidence (METHODOLOGY.md, SOURCES.md, pipeline)
+* **[Map](index.html)** *(default landing page)* — choropleth of all 50 cercle boundaries coloured by tier, Critical cercles labelled, and a legend that pairs each tier with a suggested action (e.g. Critical → field-validate first); popup shows coverage, schools matched, closure rate, conflict count, fatalities, and a "what drives the score" bar splitting the EDI into its closure / events / fatalities contributions. A collapsible story panel adds a one-sentence headline answer, headline stats with sources, clickable priority-cluster cards that zoom to their cercles, a plain-language "how to read this map" note, links to the evidence (METHODOLOGY.md, SOURCES.md, pipeline), a sources list and a field-validation disclaimer
 * **[Dashboard](dashboard.html)** — bubble scatter (centerpiece), donut, top-10 bar with Critical Tier highlighted in red, regional bar, "Mali at a Glance" callout, methodology note
 
 🔗 *View the visual artifact:* [https://MegPhapha.github.io/EduDisruption-Index/](https://MegPhapha.github.io/EduDisruption-Index/)
