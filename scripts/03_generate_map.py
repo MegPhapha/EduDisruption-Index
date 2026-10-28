@@ -216,14 +216,17 @@ def generate():
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body {{ font-family: -apple-system, 'Segoe UI', sans-serif; margin: 0; }}
-        #map {{ height: 100vh; width: 100%; }}
+        body {{ font-family: -apple-system, 'Segoe UI', sans-serif; margin: 0; background: #f4f7f9; color: #1a202c; }}
+        /* Map stops short of the fold so the sections below are visibly there. */
+        .map-stage {{ position: relative; height: 88vh; min-height: 520px; }}
+        #map {{ height: 100%; width: 100%; }}
         .nav-btn {{ position: absolute; top: 20px; right: 20px; z-index: 1000; background: #fee08b; color: #1a2a3a; padding: 14px 22px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 15px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(0,0,0,0.25), 0 0 0 3px rgba(254, 224, 139, 0.35); transition: transform 0.15s ease, box-shadow 0.15s ease; display: inline-flex; align-items: center; gap: 8px; }}
         .nav-btn:hover {{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.3), 0 0 0 4px rgba(254, 224, 139, 0.5); }}
         .nav-btn .icon {{ font-size: 18px; line-height: 1; }}
-        .story-toggle {{ position: absolute; top: 20px; left: 20px; z-index: 1100; background: #1a2a3a; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-family: inherit; }}
+        .story-toggle {{ position: absolute; top: 96px; left: 26px; z-index: 1100; background: #1a2a3a; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-family: inherit; }}
         .story-toggle:hover {{ background: #2c415c; }}
-        #story {{ position: absolute; top: 0; left: 0; bottom: 0; width: min(400px, 92vw); background: rgba(255,255,255,0.97); z-index: 1050; overflow-y: auto; padding: 70px 20px 20px; box-shadow: 2px 0 14px rgba(0,0,0,0.18); transform: translateX(-102%); transition: transform 0.25s ease; }}
+        /* Panel starts below Leaflet's zoom control so the +/- buttons stay usable. */
+        #story {{ position: absolute; top: 84px; left: 10px; bottom: 10px; width: min(390px, calc(100vw - 40px)); box-sizing: border-box; background: rgba(255,255,255,0.97); z-index: 1050; overflow-y: auto; padding: 62px 20px 20px; border-radius: 8px; box-shadow: 0 2px 14px rgba(0,0,0,0.18); transform: translateX(-110%); transition: transform 0.25s ease; }}
         #story.open {{ transform: none; }}
         #story h1 {{ margin: 6px 0 6px 0; font-size: 19px; color: #1a2a3a; }}
         #story .lede {{ margin: 0 0 14px 0; font-size: 13px; color: #4a5568; line-height: 1.5; font-style: italic; }}
@@ -247,8 +250,31 @@ def generate():
         .prose {{ font-size: 12.5px; color: #4a5568; line-height: 1.55; margin: 0; }}
         .prose a {{ color: #1a2a3a; font-weight: 600; }}
         .footnote {{ font-size: 11.5px; color: #718096; margin: 2px 0 0 0; line-height: 1.5; }}
-        .sources {{ font-size: 11.5px; color: #4a5568; line-height: 1.5; margin: 0; padding-left: 16px; }}
-        .disclaimer {{ font-size: 11.5px; color: #1a2a3a; background: #fff8e1; border-left: 3px solid #fee08b; border-radius: 4px; padding: 8px 10px; margin: 14px 0 0 0; line-height: 1.5; }}
+        .jump {{ display: inline-block; margin-top: 14px; font-size: 12.5px; font-weight: 600; color: #1a2a3a; }}
+        .below {{ max-width: 1080px; margin: 0 auto; padding: 0 20px; }}
+        .read {{ padding: 40px 0 8px; }}
+        .read h2, .foot h2 {{ font-size: 22px; color: #1a2a3a; margin: 0 0 6px 0; }}
+        .read .intro {{ font-size: 15px; color: #4a5568; line-height: 1.55; margin: 0 0 20px 0; max-width: 760px; }}
+        .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }}
+        .cell {{ background: #fff; border-radius: 8px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-top: 3px solid #1a2a3a; }}
+        .cell-eyebrow {{ font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #718096; margin: 0; }}
+        .cell-stat {{ font-size: 28px; font-weight: 700; color: #1a2a3a; margin: 4px 0; }}
+        .cell p {{ font-size: 13px; color: #4a5568; line-height: 1.5; margin: 0; }}
+        .cell .src {{ display: block; font-size: 11.5px; color: #718096; margin-top: 6px; }}
+        .rules {{ margin: 22px 0 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }}
+        .rules li {{ display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: #2d3748; line-height: 1.5; background: #fff; border-radius: 6px; padding: 9px 12px; }}
+        .rules .swatch {{ width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; margin-top: 3px; }}
+        .rules .dashed {{ outline: 1.5px dashed #555; outline-offset: -1.5px; }}
+        .method-note {{ font-size: 13px; color: #4a5568; line-height: 1.55; margin: 16px 0 0 0; }}
+        .method-note a, .foot a {{ color: #1a2a3a; font-weight: 600; }}
+        .cta-band {{ margin: 32px 0; background: #1a2a3a; color: #fff; border-radius: 10px; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }}
+        .cta-eyebrow {{ font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #fee08b; margin: 0 0 6px 0; }}
+        .cta-lead {{ font-size: 16px; line-height: 1.5; margin: 0; max-width: 640px; color: #e2e8f0; }}
+        .cta-btn {{ display: inline-flex; align-items: center; gap: 8px; background: #fee08b; color: #1a2a3a; text-decoration: none; font-weight: 700; font-size: 15px; padding: 12px 20px; border-radius: 6px; white-space: nowrap; transition: transform 0.15s ease; }}
+        .cta-btn:hover {{ transform: translateY(-2px); }}
+        .foot {{ border-top: 1px solid #e2e8f0; padding: 20px 0 32px; font-size: 12.5px; color: #4a5568; line-height: 1.6; }}
+        .foot p {{ margin: 0 0 8px 0; }}
+        .disclaimer {{ color: #1a2a3a; background: #fff8e1; border-left: 3px solid #fee08b; border-radius: 4px; padding: 8px 12px; }}
         .legend {{ position: absolute; top: 76px; right: 20px; z-index: 1000; background: white; padding: 10px 14px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 12px; }}
         .legend .title {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #1a2a3a; margin-bottom: 4px; }}
         .legend .row {{ display: flex; align-items: flex-start; margin: 5px 0; }}
@@ -258,10 +284,11 @@ def generate():
         .legend .action {{ font-size: 10.5px; color: #4a5568; }}
         .crit-label {{ background: transparent; border: none; box-shadow: none; color: #fff; font-weight: 700; font-size: 11px; text-shadow: 0 0 3px #000, 0 0 2px #000; padding: 0; }}
         .crit-label::before {{ display: none; }}
-        @media (max-width: 700px) {{ .legend .action {{ display: none; }} }}
+        @media (max-width: 700px) {{ .legend .action {{ display: none; }} .cta-band {{ padding: 20px; }} }}
     </style>
 </head>
 <body>
+    <div class="map-stage">
     <a href="dashboard.html" class="nav-btn"><span class="icon">📊</span>Open Analytics Dashboard →</a>
     <button id="story-toggle" class="story-toggle">☰ Story</button>
     <aside id="story" class="open">
@@ -283,26 +310,49 @@ def generate():
             <div class="cluster-blurb">School-data coverage too thin to score closures. Grey cercles reflect conflict signal only — field verification needed before these cercles can be ruled out.</div>
         </div>
         <p class="footnote">The cards above cover all {n_critical} Critical cercles; click one to zoom to it. {n_high} more sit in the High tier. Click any cercle on the map for the numbers driving its score.</p>
-        <h2>How to read this map</h2>
-        <p class="prose">Each cercle is scored on three indicators: share of matched schools closed (<b>50%</b>), ACLED conflict events per 100k people (<b>25%</b>), and fatalities per 100k (<b>25%</b>), 2020–2024, each normalised to the dataset maximum. Colour shows the tier, and Critical cercles are labelled by name. <b>Grey, dash-outlined cercles are Data-Limited</b>: scored on conflict intensity only.</p>
         <h2>A note on field knowledge</h2>
         <p class="prose">This map is a starting point for conversation, not an answer. Where it disagrees with what education teams know on the ground, the disagreement itself is the most useful finding: it points either to a data gap or to a ground condition the data cannot see. Both improve the method.</p>
-        <h2>Inspect the evidence</h2>
-        <p class="prose">Every figure on this page is computed from open data by the pipeline in <a href="https://github.com/MegPhapha/EduDisruption-Index/tree/main/scripts">scripts/</a>. Scoring rules and limitations in <a href="https://github.com/MegPhapha/EduDisruption-Index/blob/main/METHODOLOGY.md">METHODOLOGY.md</a>; source details in <a href="https://github.com/MegPhapha/EduDisruption-Index/blob/main/data/raw/SOURCES.md">SOURCES.md</a>. Continue to the <a href="dashboard.html">analytics dashboard</a>.</p>
-        <h2>Sources</h2>
-        <ul class="sources">
-            <li>Conflict events and fatalities: ACLED, 2020–2024, via HDX</li>
-            <li>School status: OCHA Mali school registry (2023), via HDX</li>
-            <li>Population: OCHA Mali admin-2 estimates (2020), via HDX</li>
-            <li>Cercle boundaries: geoBoundaries (OCHA / DNCT, CC BY 4.0)</li>
-        </ul>
-        <p class="disclaimer"><b>Proof of concept.</b> Tiers rank relative risk across Mali's {n_total} cercles; they are not a needs assessment. Field validation is required before any planning decision.</p>
+        <a class="jump" href="#how-to-read">How to read this map ↓</a>
     </aside>
     <div class="legend">
         <div class="title">Priority tier</div>
         {legend_rows}
     </div>
     <div id="map"></div>
+    </div>
+
+    <main class="below">
+        <section class="read" id="how-to-read">
+            <h2>How to read this map</h2>
+            <p class="intro">Each of Mali's {n_total} cercles gets an Education Disruption Index (EDI) score from 0 to 1, built from three indicators for 2020–2024. Each indicator is divided by the highest value of any cercle, then weighted:</p>
+            <div class="grid">
+                <div class="cell"><p class="cell-eyebrow">School closures</p><div class="cell-stat">50%</div><p>Share of matched schools recorded as closed.<span class="src">OCHA Mali school registry (2023)</span></p></div>
+                <div class="cell"><p class="cell-eyebrow">Conflict events</p><div class="cell-stat">25%</div><p>Conflict events per 100,000 people.<span class="src">ACLED, 2020–2024</span></p></div>
+                <div class="cell"><p class="cell-eyebrow">Fatalities</p><div class="cell-stat">25%</div><p>Conflict fatalities per 100,000 people.<span class="src">ACLED, 2020–2024</span></p></div>
+            </div>
+            <ul class="rules">
+                <li><span class="swatch" style="background:{colors['Critical']}"></span><span><b>Critical ({n_critical})</b>: the top {n_critical} cercles by EDI that have reliable school data (3 or more matched schools). These are labelled on the map and are where field validation should start.</span></li>
+                <li><span class="swatch" style="background:{colors['High']}"></span><span><b>High ({n_high})</b>: EDI of 0.4 or more.</span></li>
+                <li><span class="swatch" style="background:{colors['Medium']}"></span><span><b>Medium ({tier_counts.get('Medium', 0)})</b>: EDI from 0.2 up to 0.4.</span></li>
+                <li><span class="swatch" style="background:{colors['Low']}"></span><span><b>Low ({tier_counts.get('Low', 0)})</b>: EDI below 0.2.</span></li>
+                <li><span class="swatch dashed" style="background:{colors['Data-Limited']}"></span><span><b>Data-Limited ({n_data_limited})</b>: fewer than 3 matched schools and fewer than 100 conflict events per 100,000 people. Too little school data to trust the closure rate, so these cercles still need field verification before they can be ruled out.</span></li>
+            </ul>
+            <p class="method-note">Click any cercle for its numbers and a bar showing how much of its score comes from closures, events and fatalities. Cercles with thin school data but severe conflict (100 or more events per 100,000) keep a conflict-driven tier. Full rules, the 2022–2024 sensitivity check and known limitations are in <a href="https://github.com/MegPhapha/EduDisruption-Index/blob/main/METHODOLOGY.md">METHODOLOGY.md</a>; the charts are on the <a href="dashboard.html">analytics dashboard</a>.</p>
+        </section>
+
+        <section class="cta-band">
+            <div>
+                <p class="cta-eyebrow">Inspect the evidence</p>
+                <p class="cta-lead">Every figure on this page is reproducible from raw open data. The pipeline, scoring rules, methodology and source notes are public.</p>
+            </div>
+            <a class="cta-btn" href="https://github.com/MegPhapha/EduDisruption-Index" target="_blank" rel="noopener">View repository →</a>
+        </section>
+
+        <footer class="foot">
+            <p><b>Sources:</b> ACLED conflict events and fatalities, 2020–2024; OCHA Mali school registry (2023); OCHA Mali admin-2 population estimates (2020), all via HDX; cercle boundaries from geoBoundaries (OCHA / DNCT, CC BY 4.0). Details in <a href="https://github.com/MegPhapha/EduDisruption-Index/blob/main/data/raw/SOURCES.md">SOURCES.md</a>.</p>
+            <p class="disclaimer"><b>Proof of concept.</b> Tiers rank relative risk across Mali's {n_total} cercles; they are not a needs assessment. Field validation is required before any planning decision.</p>
+        </footer>
+    </main>
     <script>
         var panel = document.getElementById('story');
         var toggle = document.getElementById('story-toggle');
